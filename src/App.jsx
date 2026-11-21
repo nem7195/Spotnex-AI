@@ -220,7 +220,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e6f7f1] via-[#f0fbf7] to-[#f8fafc] text-[#0f172a] flex flex-col font-sans">
       
-      {/* 1. Top Navbar: Sticky white bar with Regional Language Toggle */}
+      {/* 1. Top Navbar: Sticky white bar with Regional Language Toggle & Account Switcher */}
       <CivicLensNavbar
         userRole={viewMode}
         onToggleUserRole={() => setViewMode(viewMode === 'citizen' ? 'officer' : 'citizen')}
@@ -230,6 +230,25 @@ export default function App() {
         onLanguageChange={setCurrentLang}
         currentUser={currentUser}
         onOpenLogin={() => setShowLoginScreen(true)}
+        onLogoClick={() => {
+          setViewMode('citizen');
+          setActiveTab('priority');
+        }}
+        onSelectAccount={(acc) => {
+          if (acc.role === 'officer') {
+            setViewMode('officer');
+          } else {
+            setViewMode('citizen');
+            const updated = {
+              name: acc.name,
+              roleOrOrg: acc.roleOrOrg,
+              mobile: acc.mobile,
+              email: acc.email
+            };
+            setCurrentUser(updated);
+            localStorage.setItem('spotnex_user', JSON.stringify(updated));
+          }
+        }}
       />
 
       {/* 2. Sub-header: Dark pill toggle + Light pill toggle */}

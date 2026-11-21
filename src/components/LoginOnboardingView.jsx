@@ -117,20 +117,14 @@ export default function LoginOnboardingView({
       {/* Centered White Rounded-3xl Login Card */}
       <div className="bg-white rounded-3xl soft-card-shadow border border-emerald-100/90 max-w-lg w-full p-5 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200">
         
-        {/* 1. Header: SpotNex SVG Logo, Title, Subtitle, Tagline */}
+        {/* 1. Header: SpotNex Logo & Tagline */}
         <div className="text-center space-y-2">
-          <div className="flex justify-center">
-            <SpotNexLogo size={52} showText={false} />
-          </div>
-          
-          <div>
-            <div className="text-2xl sm:text-3xl font-black font-space tracking-tight">
-              <span className="text-[#f97316]">SPOT</span>
-              <span className="text-[#0d9488]">NEX</span>
-            </div>
-            <div className="text-[10px] font-mono-hud font-extrabold uppercase tracking-widest text-[#0d9488]">
-              AI CIVIC CONNECT
-            </div>
+          <div className="flex justify-center py-2">
+            <img 
+              src="/spotnex-logo.png" 
+              alt="SpotNex AI Civic Connect" 
+              className="h-24 sm:h-32 w-auto max-w-[90%] object-contain drop-shadow-md transition-transform hover:scale-105" 
+            />
           </div>
 
           <p className="text-xs sm:text-[13px] text-slate-600 font-medium leading-relaxed max-w-sm mx-auto">
