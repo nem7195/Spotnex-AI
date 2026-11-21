@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicLens — AI Municipal Grievance Triage</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cyan: '#06b6d4',
+              indigo: '#6366f1',
+              dark: '#07090e',
+              surface: '#0e131f',
+              elevated: '#151c2e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#07090e] text-slate-100 min-h-screen antialiased flex flex-col">
+
+  <!-- TOP APP NAVIGATION -->
+  <header class="border-b border-slate-800 bg-[#0e131f]/90 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-bold tracking-tight text-white">Civic<span class="text-cyan-400">Lens</span></span>
+            <span class="text-[11px] font-semibold uppercase px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-mono-code tracking-wider">AI TRIAGE ENGINE</span>
+          </div>
+          <p class="text-xs text-slate-400">Intelligent Municipal Grievance Routing & Triage</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs & Actions -->
+      <div class="flex items-center gap-3">
+        <!-- View Toggle Pills -->
+        <div class="bg-slate-900 border border-slate-800 p-1 rounded-xl flex items-center gap-1">
+          <button id="tabOfficerBtn" onclick="switchView('officer')" class="px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-2 transition-all bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-md">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            Officer Dashboard
+          </button>
+          <button id="tabCitizenBtn" onclick="switchView('citizen')" class="px-4 py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-white flex items-center gap-2 transition-all">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            Citizen Intake Form
+          </button>
+        </div>
+
+        <!-- Reset Demo Seed Button -->
+        <button onclick="resetDemoData()" title="Reset to initial 3 demo tickets" class="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/60 text-slate-300 hover:text-white transition">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          Reset Demo
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: OFFICER DASHBOARD (DARK, HIGH-CONTRAST) -->
+    <!-- ========================================== -->
+    <section id="officerView" class="space-y-6">
+
+      <!-- TOP METRIC CARDS -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Metric 1 -->
+        <div class="glass-card p-4 rounded-xl border border-slate-800 bg-[#0e131f]">
+          <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
+            <span>Total Complaints</span>
+            <i data-lucide="inbox" class="w-4 h-4 text-cyan-400"></i>
+          </div>
+          <div id="statTotal" class="text-2xl font-bold text-white tracking-tight">3</div>
+          <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+            <span class="text-cyan-400">● Live</span> Ingestion active
+          </div>
+        </div>
+
+        <!-- Metric 2 -->
+        <div class="glass-card p-4 rounded-xl border border-red-900/40 bg-red-950/20">
+          <div class="flex items-center justify-between text-red-300 text-xs mb-2">
+            <span class="font-semibold">Critical Threats</span>
+            <div class="w-2.5 h-2.5 rounded-full bg-red-500 pulse-critical-ring"></div>
+          </div>
+          <div id="statCritical" class="text-2xl font-bold text-red-400 tracking-tight">1</div>
+          <div class="text-[11px] text-red-300/80 mt-1 font-mono-code">Immediate dispatch SLA &lt;2h</div>
+        </div>
+
+        <!-- Metric 3 -->
+        <div class="glass-card p-4 rounded-xl border border-amber-900/40 bg-amber-950/20">
+          <div class="flex items-center justify-between text-amber-300 text-xs mb-2">
+            <span class="font-semibold">High Priority</span>
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div id="statHigh" class="text-2xl font-bold text-amber-400 tracking-tight">1</div>
+          <div class="text-[11px] text-amber-300/80 mt-1 font-mono-code">Service disruption risk</div>
+        </div>
+
+        <!-- Metric 4 -->
+        <div class="glass-card p-4 rounded-xl border border-slate-800 bg-[#0e131f]">
+          <div class="flex items-center justify-between text-slate-400 text-xs mb-2">
+            <span>AI Triage Speed</span>
+            <i data-lucide="zap" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <div class="text-2xl font-bold text-emerald-400 tracking-tight">&lt; 1.2s</div>
+          <div class="text-[11px] text-slate-400 mt-1">Multi-modal &amp; Multilingual</div>
+        </div>
+      </div>
+
+      <!-- FILTER & SEARCH BAR -->
+      <div class="glass-panel p-4 rounded-xl border border-slate-800 space-y-3">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          
+          <!-- Search input -->
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search by complaint, department, keyword, or Ticket ID..." 
+              class="w-full bg-slate-900/90 border border-slate-800 rounded-lg pl-10 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+          </div>
+
+          <!-- Quick Action -->
+          <button onclick="switchView('citizen')" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-lg shadow-cyan-600/20 whitespace-nowrap">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Complaint Triage
+          </button>
+        </div>
+
+        <!-- Filter Pills Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80 text-xs">
+          <!-- Severity Filter Pills -->
+          <div class="flex flex-wrap items-center gap-1.5" id="severityFilterGroup">
+            <span class="text-slate-400 mr-1 font-medium text-[11px]">Severity:</span>
+            <button onclick="setFilter('severity', 'ALL')" data-filter-type="severity" data-val="ALL" class="filter-pill-active px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-white border border-slate-700">All</button>
+            <button onclick="setFilter('severity', 'Critical')" data-filter-type="severity" data-val="Critical" class="px-2.5 py-1 rounded-md text-xs font-medium bg-red-950/40 text-red-300 border border-red-900/40 hover:bg-red-900/60">Critical</button>
+            <button onclick="setFilter('severity', 'High')" data-filter-type="severity" data-val="High" class="px-2.5 py-1 rounded-md text-xs font-medium bg-amber-950/40 text-amber-300 border border-amber-900/40 hover:bg-amber-900/60">High</button>
+            <button onclick="setFilter('severity', 'Medium')" data-filter-type="severity" data-val="Medium" class="px-2.5 py-1 rounded-md text-xs font-medium bg-yellow-950/40 text-yellow-300 border border-yellow-900/40 hover:bg-yellow-900/60">Medium</button>
+            <button onclick="setFilter('severity', 'Low')" data-filter-type="severity" data-val="Low" class="px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-950/40 text-emerald-300 border border-emerald-900/40 hover:bg-emerald-900/60">Low</button>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="flex flex-wrap items-center gap-1.5" id="categoryFilterGroup">
+            <span class="text-slate-400 mr-1 font-medium text-[11px]">Category:</span>
+            <button onclick="setFilter('category', 'ALL')" data-filter-type="category" data-val="ALL" class="filter-pill-active px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-white border border-slate-700">All</button>
+            <button onclick="setFilter('category', 'electricity')" data-filter-type="category" data-val="electricity" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700">⚡ Electricity</button>
+            <button onclick="setFilter('category', 'roads')" data-filter-type="category" data-val="roads" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700">🛣️ Roads</button>
+            <button onclick="setFilter('category', 'water')" data-filter-type="category" data-val="water" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700">💧 Water</button>
+            <button onclick="setFilter('category', 'waste')" data-filter-type="category" data-val="waste" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700">🗑️ Waste</button>
+            <button onclick="setFilter('category', 'drainage')" data-filter-type="category" data-val="drainage" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700">🕳️ Drainage</button>
+            <button onclick="setFilter('category', 'trees')" data-filter-type="category" data-val="trees" class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700">🌳 Trees</button>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400 mr-1 font-medium text-[11px]">Status:</span>
+            <select id="statusFilterSelect" onchange="applyFilters()" class="bg-slate-900 border border-slate-800 rounded-md px-2 py-1 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
+              <option value="ALL">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- TICKETS SORTED LIST (Requirement 3 & 5: Sorted Critical -> Low) -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+          <span id="ticketCountLabel">Displaying 3 tickets (Sorted by Priority: Critical → Low)</span>
+          <span class="text-slate-500">Auto-refreshes on intake</span>
+        </div>
+
+        <div id="ticketsContainer" class="space-y-3">
+          <!-- Tickets injected dynamically by app.js -->
+        </div>
+
+        <!-- Empty state -->
+        <div id="emptyState" class="hidden p-12 text-center border border-dashed border-slate-800 rounded-xl">
+          <i data-lucide="clipboard-check" class="w-10 h-10 text-slate-600 mx-auto mb-3"></i>
+          <p class="text-slate-400 text-sm">No complaints match your active filters.</p>
+          <button onclick="clearAllFilters()" class="mt-3 text-cyan-400 hover:underline text-xs">Clear all filters</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: CITIZEN INTAKE PORTAL (MULTILINGUAL) -->
+    <!-- ========================================== -->
+    <section id="citizenView" class="hidden max-w-3xl mx-auto space-y-6">
+
+      <!-- Form Card -->
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800 bg-[#0e131f] shadow-2xl">
+        
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="message-square-plus" class="w-5 h-5 text-cyan-400"></i>
+              Citizen Grievance Submission
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Accepts complaints in English or Indian regional languages (Hindi, Kannada, Tamil, etc.) with optional photo.</p>
+          </div>
+          <span class="text-[10px] uppercase font-mono-code px-2 py-1 bg-cyan-950 text-cyan-400 border border-cyan-800/50 rounded-lg">Citizen Portal</span>
+        </div>
+
+        <!-- QUICK SAMPLE PROMPTS (For 1-click hackathon demo) -->
+        <div class="mb-5 p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+            <span class="font-medium flex items-center gap-1.5 text-cyan-300">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              Quick Demo Scenarios (Click to auto-fill):
+            </span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button type="button" onclick="loadSample(1)" class="sample-chip p-2 rounded-lg text-left text-xs flex items-center justify-between group">
+              <div>
+                <span class="text-red-400 font-semibold text-[10px] uppercase block">Critical Scenario (Hindi)</span>
+                <span class="text-slate-300 group-hover:text-white truncate block">बिजली का तार खंभे से टूटकर...</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400"></i>
+            </button>
+            <button type="button" onclick="loadSample(2)" class="sample-chip p-2 rounded-lg text-left text-xs flex items-center justify-between group">
+              <div>
+                <span class="text-amber-400 font-semibold text-[10px] uppercase block">High Scenario (English)</span>
+                <span class="text-slate-300 group-hover:text-white truncate block">Water main burst, street flooded...</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400"></i>
+            </button>
+            <button type="button" onclick="loadSample(3)" class="sample-chip p-2 rounded-lg text-left text-xs flex items-center justify-between group">
+              <div>
+                <span class="text-yellow-400 font-semibold text-[10px] uppercase block">Medium Scenario (Kannada)</span>
+                <span class="text-slate-300 group-hover:text-white truncate block">ಕಸದ ತೊಟ್ಟಿ ತುಂಬಿ ರಸ್ತೆಗೆ ಹರಡಿದೆ...</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400"></i>
+            </button>
+            <button type="button" onclick="loadSample(4)" class="sample-chip p-2 rounded-lg text-left text-xs flex items-center justify-between group">
+              <div>
+                <span class="text-red-400 font-semibold text-[10px] uppercase block">Drainage Critical (English)</span>
+                <span class="text-slate-300 group-hover:text-white truncate block">Open deep manhole outside school...</span>
+              </div>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- INTAKE FORM -->
+        <form id="complaintForm" onsubmit="handleComplaintSubmit(event)" class="space-y-4">
+          
+          <!-- Free text grievance input with Voice Record button -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="complaintText" class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                Complaint Description
+                <span class="text-red-400">*</span>
+              </label>
+              <!-- Voice Input Button (Web Speech API) -->
+              <button type="button" id="voiceBtn" onclick="toggleVoiceRecording()" title="Speak in Hindi, English or regional languages" 
+                class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-slate-700 bg-slate-800 text-slate-300 hover:text-cyan-400 hover:border-cyan-500 transition">
+                <i data-lucide="mic" id="voiceIcon" class="w-3.5 h-3.5"></i>
+                <span id="voiceText">Voice Input</span>
+              </button>
+            </div>
+            <textarea id="complaintText" rows="4" required placeholder="Describe the civic issue in your own words (e.g. Hindi, Kannada, Tamil, English)... E.g. 'बिजली का खुला तार सड़क पर पड़ा है' or 'Open deep pothole near hospital gate'"
+              class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition"></textarea>
+          </div>
+
+          <!-- Location & Citizen Info -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="locationInput" class="block text-xs font-semibold text-slate-300 mb-1.5">Location / Landmark</label>
+              <input type="text" id="locationInput" placeholder="e.g. Ward 35, 12th Main Road, Indiranagar"
+                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+            </div>
+            <div>
+              <label for="citizenName" class="block text-xs font-semibold text-slate-300 mb-1.5">Citizen Name / Contact (Optional)</label>
+              <input type="text" id="citizenName" placeholder="e.g. Priya Sharma / +91 98765 43210"
+                class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+            </div>
+          </div>
+
+          <!-- Optional Image Upload Dropzone -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Photo Evidence (Optional, Multimodal AI Analysis)</label>
+            <div id="dropzone" onclick="document.getElementById('imageInput').click()" 
+              class="border-2 border-dashed border-slate-800 hover:border-cyan-500/60 rounded-xl p-4 text-center cursor-pointer bg-slate-900/40 hover:bg-slate-900/80 transition group">
+              <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="previewImage(this)">
+              <div id="dropzonePrompt" class="flex flex-col items-center gap-1.5">
+                <i data-lucide="camera" class="w-6 h-6 text-slate-500 group-hover:text-cyan-400 transition"></i>
+                <span class="text-xs text-slate-400 group-hover:text-slate-300">Click to upload photo of pothole, wire, garbage, or pipe burst</span>
+                <span class="text-[10px] text-slate-600">JPG, PNG up to 10MB</span>
+              </div>
+              <!-- Image preview thumbnail -->
+              <div id="dropzonePreview" class="hidden flex items-center justify-between bg-slate-950 p-2 rounded-lg border border-slate-800">
+                <div class="flex items-center gap-3">
+                  <img id="previewImg" src="" alt="Complaint photo" class="w-12 h-12 object-cover rounded-md border border-slate-700">
+                  <div class="text-left">
+                    <span id="previewName" class="text-xs font-medium text-slate-200 block truncate max-w-[200px]">image.jpg</span>
+                    <span class="text-[10px] text-emerald-400 flex items-center gap-1">
+                      <i data-lucide="check" class="w-3 h-3"></i> Attached for Multimodal Triage
+                    </span>
+                  </div>
+                </div>
+                <button type="button" onclick="event.stopPropagation(); removeImage();" class="text-slate-500 hover:text-red-400 p-1">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="submitBtn" class="w-full py-3 bg-gradient-to-r from-cyan-600 via-indigo-600 to-cyan-600 bg-size-200 hover:bg-right transition-all duration-300 text-white font-semibold rounded-xl text-sm shadow-lg shadow-cyan-600/25 flex items-center justify-center gap-2">
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+            Run AI Triage &amp; Dispatch Ticket
+          </button>
+        </form>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- TICKET INSPECTION MODAL -->
+  <!-- ========================================== -->
+  <div id="ticketModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0e131f] border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between pb-3 border-b border-slate-800">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span id="modalTicketId" class="text-base font-mono-code font-bold text-cyan-400">TKT-XXXX</span>
+            <span id="modalSeverityBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold">CRITICAL</span>
+            <span id="modalCategoryBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Electricity</span>
+          </div>
+          <p id="modalCreatedAt" class="text-xs text-slate-400">Reported 10 minutes ago</p>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="space-y-4 text-xs">
+
+        <!-- English Summary Card -->
+        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-cyan-400 mb-1 flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            AI English Summary
+          </div>
+          <p id="modalSummary" class="text-sm font-medium text-slate-100 leading-relaxed"></p>
+        </div>
+
+        <!-- Triage Justification & Department -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <span class="text-slate-400 block mb-1">Severity Justification:</span>
+            <p id="modalReason" class="text-slate-200 font-medium"></p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <span class="text-slate-400 block mb-1">Routed Municipal Department:</span>
+            <p id="modalDept" class="text-cyan-300 font-semibold"></p>
+          </div>
+        </div>
+
+        <!-- Raw Citizen Grievance & Language -->
+        <div class="p-3 rounded-xl bg-slate-900/40 border border-slate-800/80 space-y-1.5">
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Raw Citizen Submission:</span>
+            <span id="modalLanguage" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono-code">Hindi</span>
+          </div>
+          <p id="modalRawText" class="text-slate-300 italic bg-black/30 p-2.5 rounded-lg border border-slate-800/60"></p>
+          <div id="modalLocationContainer" class="text-slate-400 flex items-center gap-1 pt-1">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span id="modalLocation">Ward 42, Near Primary School</span>
+          </div>
+        </div>
+
+        <!-- Photo preview if available -->
+        <div id="modalImageContainer" class="hidden p-3 rounded-xl bg-slate-900/40 border border-slate-800">
+          <span class="text-slate-400 block mb-2">Attached Photographic Evidence:</span>
+          <img id="modalImage" src="" alt="Complaint photo" class="w-full max-h-56 object-cover rounded-lg border border-slate-700">
+        </div>
+
+        <!-- Operational Action Recommendation -->
+        <div class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-900/40 flex items-start gap-2.5">
+          <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-semibold text-emerald-300 block">Recommended Dispatch Action:</span>
+            <p id="modalAction" class="text-emerald-200/90 mt-0.5"></p>
+          </div>
+        </div>
+
+        <!-- Officer Status Toggle -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+          <span class="text-slate-400">Update Ticket Lifecycle:</span>
+          <div class="flex items-center gap-2">
+            <button onclick="updateTicketStatus('Pending')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200">Pending</button>
+            <button onclick="updateTicketStatus('In Progress')" class="px-3 py-1.5 rounded-lg bg-amber-900/40 hover:bg-amber-900/70 text-amber-300 border border-amber-800/50">In Progress</button>
+            <button onclick="updateTicketStatus('Resolved')" class="px-3 py-1.5 rounded-lg bg-emerald-900/40 hover:bg-emerald-900/70 text-emerald-300 border border-emerald-800/50">Resolved</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LOADING OVERLAY DURING AI TRIAGE -->
+  <div id="loadingOverlay" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center space-y-4">
+    <div class="relative w-16 h-16">
+      <div class="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin"></div>
+      <i data-lucide="sparkles" class="w-6 h-6 text-cyan-400 absolute inset-0 m-auto animate-pulse"></i>
+    </div>
+    <div class="text-center space-y-1">
+      <h3 class="text-lg font-bold text-white tracking-wide">CivicLens AI Triaging...</h3>
+      <p class="text-xs text-slate-400">Detecting language, evaluating public safety risk &amp; routing to municipal department</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
