@@ -232,15 +232,15 @@ Under Section 133 of the Code of Criminal Procedure, it is the bounden statutory
 
 You are hereby requested to cause an immediate inspection and dispatch an emergency rectification squad within the stipulated civic SLA (${severity === 'Critical' ? '2 Hours' : severity === 'High' ? '12 Hours' : '48 Hours'}). Failure to abate life-threatening hazards may attract legal liability for municipal negligence under Indian law.
 
-Digital Forensic Verification Seal Attached: CIVICLENS-BBMP-GOV
-Generated via CivicLens AI Triage System`;
+Digital Forensic Verification Seal Attached: SPOTNEX-BBMP-GOV
+Generated via SpotNex AI Triage System`;
 
   const socialPost = `🚨 CIVIC HAZARD ALERT [${severity.toUpperCase()}] in #Bengaluru!
 Grievance: ${english_summary}
 Location: ${loc}
 Dept Responsible: ${dept.twitter} (${dept.name})
 Urgency: ${one_line_reason}
-Urgent inspection demanded under Section 133 CrPC! @CMofKarnataka @DKShivakumar #CivicLens #BBMP #BengaluruCivic`;
+Urgent inspection demanded under Section 133 CrPC! @CMofKarnataka @DKShivakumar #SpotNex #BBMP #BengaluruCivic`;
 
   return {
     statutory_email: {
@@ -715,7 +715,7 @@ app.get('/api/stats', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`🚀 CivicLens AI Triage System is LIVE!`);
+  console.log(`🚀 SpotNex AI Civic Connect is LIVE!`);
   console.log(`📡 URL: http://localhost:${PORT}`);
   console.log(`🔑 Gemini API Key: ${process.env.GEMINI_API_KEY ? 'Active (Live Generative AI)' : 'Not set (Active Heuristic Engine)'}`);
   console.log(`======================================================\n`);

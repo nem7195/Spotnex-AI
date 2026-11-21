@@ -11,6 +11,7 @@ import OfficerDashboard from './components/OfficerDashboard';
 import TriageReviewModal from './components/TriageReviewModal';
 import TicketModal from './components/TicketModal';
 import LegalShieldModal from './components/LegalShieldModal';
+import LoginOnboardingView from './components/LoginOnboardingView';
 import { initialDemoTickets, triageHazardAPI } from './utils/triageEngine';
 
 const severityRank = {
@@ -21,6 +22,24 @@ const severityRank = {
 };
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = localStorage.getItem('spotnex_user');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return {
+      name: 'Rajesh Gowda',
+      roleOrOrg: 'Resident (Ward 174, HSR Layout)',
+      mobile: '+91 98451 23456',
+      email: 'rajesh.gowda@spotnex.gov.in'
+    };
+  });
+
+  const [showLoginScreen, setShowLoginScreen] = useState(() => {
+    // First screen user sees on visit
+    return !sessionStorage.getItem('spotnex_entered');
+  });
+
   const [viewMode, setViewMode] = useState('citizen'); // 'citizen' | 'officer'
   const [layoutMode, setLayoutMode] = useState('mobile'); // 'mobile' | 'web'
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'priority' | 'lens' | 'map' | 'tracker'
@@ -78,7 +97,7 @@ export default function App() {
         imageBase64: evidenceData.dataUrl || null,
         latitude: evidenceData.latitude || 12.9716,
         longitude: evidenceData.longitude || 77.5946,
-        citizen_name: "Rajesh Gowda (Citizen)"
+        citizen_name: currentUser ? `${currentUser.name} (${currentUser.roleOrOrg || 'Citizen'})` : "Rajesh Gowda (Citizen)"
       });
 
       // AI-Slop & Authenticity Gatekeeper Verification
@@ -110,7 +129,7 @@ export default function App() {
     const { evidence, complaintText } = reviewModalData;
 
     const newTicket = {
-      id: `CVL-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: `SPX-${Math.floor(1000 + Math.random() * 9000)}`,
       citizen_text: complaintText || "Forensic camera evidence",
       detected_language: finalTriage.detected_language || "English",
       category: finalTriage.category || "roads",
@@ -122,10 +141,10 @@ export default function App() {
       english_summary: finalTriage.english_summary,
       status: 'Pending',
       location: `Ward 174, Bengaluru (GPS: ${evidence?.latitude?.toFixed(4) || '12.9716'}°, ${evidence?.longitude?.toFixed(4) || '77.5946'}°)`,
-      citizen_name: 'Rajesh Gowda',
-      citizen_phone: '+91 98451 23456',
+      citizen_name: currentUser?.name || 'Rajesh Gowda',
+      citizen_phone: currentUser?.mobile || '+91 98451 23456',
       image_url: evidence?.dataUrl || null,
-      watermark_hash: evidence?.tamperSeal || 'CIVICLENS_SEAL_0x8F',
+      watermark_hash: evidence?.tamperSeal || 'SPOTNEX_SEAL_0x8F',
       action_drafts: finalTriage.action_drafts,
       created_at: new Date().toISOString(),
       action_recommendation: finalTriage.action_recommendation || "Dispatch response crew.",
@@ -171,6 +190,33 @@ export default function App() {
     }
   };
 
+  if (showLoginScreen) {
+    return (
+      <LoginOnboardingView
+        onLoginSuccess={(userData) => {
+          setCurrentUser(userData);
+          localStorage.setItem('spotnex_user', JSON.stringify(userData));
+          sessionStorage.setItem('spotnex_entered', 'true');
+          setShowLoginScreen(false);
+        }}
+        onQuickStartGuest={() => {
+          const guestUser = {
+            name: 'Guest Citizen',
+            roleOrOrg: 'Bengaluru Resident',
+            mobile: '+91 98451 23456',
+            email: 'guest@spotnex.gov.in'
+          };
+          setCurrentUser(guestUser);
+          sessionStorage.setItem('spotnex_entered', 'true');
+          setShowLoginScreen(false);
+          setActiveTab('lens'); // Jump straight to camera/intake
+        }}
+        canReturnToDashboard={!!sessionStorage.getItem('spotnex_entered')}
+        onBackToDashboard={() => setShowLoginScreen(false)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e6f7f1] via-[#f0fbf7] to-[#f8fafc] text-[#0f172a] flex flex-col font-sans">
       
@@ -179,9 +225,11 @@ export default function App() {
         userRole={viewMode}
         onToggleUserRole={() => setViewMode(viewMode === 'citizen' ? 'officer' : 'citizen')}
         onOpenLegal={() => setShowLegalShield(true)}
-        onOpenSettings={() => alert("CivicLens System Status: Online (Gemini Cascade Active, OpenStreetMap Free Tiles, GPS Lock OK)")}
+        onOpenSettings={() => alert("SpotNex System Status: Online (Gemini Cascade Active, OpenStreetMap Free Tiles, GPS Lock OK)")}
         currentLang={currentLang}
         onLanguageChange={setCurrentLang}
+        currentUser={currentUser}
+        onOpenLogin={() => setShowLoginScreen(true)}
       />
 
       {/* 2. Sub-header: Dark pill toggle + Light pill toggle */}
@@ -308,7 +356,7 @@ export default function App() {
         <div className="fixed inset-0 z-50 bg-[#071713]/85 backdrop-blur-md flex flex-col items-center justify-center space-y-3">
           <div className="w-12 h-12 rounded-full border-4 border-emerald-400/20 border-t-emerald-400 animate-spin"></div>
           <div className="text-center">
-            <span className="font-bold text-sm text-white font-space">CivicLens AI Triaging...</span>
+            <span className="font-bold text-sm text-white font-space">SpotNex AI Triaging...</span>
             <p className="text-[11px] text-emerald-200">Processing visual evidence u/s 133 CrPC</p>
           </div>
         </div>

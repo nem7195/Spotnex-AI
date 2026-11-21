@@ -52,7 +52,7 @@ export default function TriageReviewModal({
   const handlePostSocial = () => {
     const postText = encodeURIComponent(
       action_drafts?.social_post || 
-      `🚨 CIVIC HAZARD [${activeSeverity.toUpperCase()}] at Bengaluru: ${editableDescription} @BBMPCOMM @BESCOM_India #CivicLens #BangaloreCivic`
+      `🚨 CIVIC HAZARD [${activeSeverity.toUpperCase()}] at Bengaluru: ${editableDescription} @BBMPCOMM @BESCOM_India #SpotNex #BengaluruCivic`
     );
     window.open(`https://twitter.com/intent/tweet?text=${postText}`, '_blank');
   };

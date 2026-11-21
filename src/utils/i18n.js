@@ -4,8 +4,8 @@
 export const translations = {
   en: {
     // Brand & Header
-    brand_title: "CivicLens",
-    brand_subtitle: "AI CIVIC TRIAGE",
+    brand_title: "SpotNex",
+    brand_subtitle: "AI CIVIC CONNECT",
     citizen_role: "Citizen Rajesh G.",
     officer_role: "Officer Sharma (BBMP)",
     active_city_badge: "Bengaluru Municipal Corp (BBMP / BESCOM / BWSSB)",
@@ -95,7 +95,7 @@ export const translations = {
     tracker_track_btn: "Track Status",
 
     // Triage Modal
-    triage_modal_tag: "CIVICLENS AI TRIAGE REVIEW",
+    triage_modal_tag: "SPOTNEX AI TRIAGE REVIEW",
     triage_modal_title: "Multimodal Hazard Evaluation",
     triage_no_hazard_title: "No Civic Hazard Detected",
     triage_severity_tier: "Hazard Severity Tier",
@@ -109,8 +109,8 @@ export const translations = {
 
   kn: {
     // Brand & Header
-    brand_title: "ಸಿವಿಕ್‌ಲೆನ್ಸ್",
-    brand_subtitle: "ಕೃತಕ ಬುದ್ಧಿಮತ್ತೆ ನಾಗರಿಕ ಪರಿಹಾರ",
+    brand_title: "ಸ್ಪಾಟ್‌ನೆಕ್ಸ್",
+    brand_subtitle: "AI ಸಿವಿಕ್ ಕನೆಕ್ಟ್",
     citizen_role: "ನಾಗರಿಕ ರಾಜೇಶ್ ಜಿ.",
     officer_role: "ಅಧಿಕಾರಿ ಶರ್ಮಾ (ಬಿಬಿಎಂಪಿ)",
     active_city_badge: "ಬೆಂಗಳೂರು ಮಹಾನಗರ ಪಾಲಿಕೆ (BBMP / BESCOM / BWSSB)",
@@ -214,8 +214,8 @@ export const translations = {
 
   hi: {
     // Brand & Header
-    brand_title: "सिविक लेंस",
-    brand_subtitle: "एआई नागरिक शिकायत निवारण",
+    brand_title: "स्पॉटनैक्स",
+    brand_subtitle: "एआई सिविक कनेक्ट",
     citizen_role: "नागरिक राजेश जी.",
     officer_role: "अधिकारी शर्मा (बीबीएमपी)",
     active_city_badge: "बेंगलुरु नगर निगम (BBMP / BESCOM / BWSSB)",
