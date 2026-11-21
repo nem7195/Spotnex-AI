@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import Header from './components/Header';
-import CitizenIntake from './components/CitizenIntake';
+import CivicLensNavbar from './components/CivicLensNavbar';
+import SubHeaderToggles from './components/SubHeaderToggles';
+import CivicLensBottomNav from './components/CivicLensBottomNav';
+import CivicFeedView from './components/CivicFeedView';
+import CivicPriorityDeck from './components/CivicPriorityDeck';
+import CivicLensView from './components/CivicLensView';
+import CivicLiveMapView from './components/CivicLiveMapView';
+import CivicTrackerView from './components/CivicTrackerView';
 import OfficerDashboard from './components/OfficerDashboard';
+import TriageReviewModal from './components/TriageReviewModal';
 import TicketModal from './components/TicketModal';
-import CitizenReviewModal from './components/CitizenReviewModal';
-import { initialDemoTickets, triageHazardAPI, classifyClientFallback } from './utils/triageEngine';
+import LegalShieldModal from './components/LegalShieldModal';
+import { initialDemoTickets, triageHazardAPI } from './utils/triageEngine';
 
 const severityRank = {
   Critical: 4,
@@ -14,7 +21,10 @@ const severityRank = {
 };
 
 export default function App() {
-  const [role, setRole] = useState('citizen'); // 'citizen' or 'officer'
+  const [viewMode, setViewMode] = useState('citizen'); // 'citizen' | 'officer'
+  const [layoutMode, setLayoutMode] = useState('mobile'); // 'mobile' | 'web'
+  const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'priority' | 'lens' | 'map' | 'tracker'
+
   const [tickets, setTickets] = useState(() => {
     const saved = localStorage.getItem('civiclens_tickets');
     if (saved) {
@@ -22,16 +32,18 @@ export default function App() {
     }
     return initialDemoTickets;
   });
+
   const [activeModalTicket, setActiveModalTicket] = useState(null);
   const [reviewModalData, setReviewModalData] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLegalShield, setShowLegalShield] = useState(false);
+  const [isTriaging, setIsTriaging] = useState(false);
 
   // Sync with localStorage
   useEffect(() => {
     localStorage.setItem('civiclens_tickets', JSON.stringify(tickets));
   }, [tickets]);
 
-  // Try to sync with backend on mount
+  // Sync with backend
   useEffect(() => {
     fetch('/api/tickets')
       .then(res => res.json())
@@ -40,84 +52,75 @@ export default function App() {
           setTickets(data.tickets);
         }
       })
-      .catch(() => {
-        // Backend not running; fallback to client state
-      });
+      .catch(() => {});
   }, []);
 
-  // Sort tickets: Critical -> High -> Medium -> Low, then newest
+  // Sorted tickets: Critical -> High -> Medium -> Low
   const sortedTickets = [...tickets].sort((a, b) => {
     const sDiff = (severityRank[b.severity] || 0) - (severityRank[a.severity] || 0);
     if (sDiff !== 0) return sDiff;
     return new Date(b.created_at) - new Date(a.created_at);
   });
 
-  // Handle complaint submission from CitizenIntake:
-  // Runs Multimodal AI Triage & Opens the Citizen Triage Review Modal
-  const handleComplaintSubmit = async (complaintData) => {
-    setIsSubmitting(true);
-
+  // Called when evidence is captured in LENS
+  const handleEvidenceConfirmed = async (evidenceData) => {
+    setIsTriaging(true);
     try {
       const triage = await triageHazardAPI({
-        complaintText: complaintData.citizen_text,
-        imageBase64: complaintData.evidence?.dataUrl || null,
-        latitude: 12.97159,
-        longitude: 77.59456,
-        citizen_name: complaintData.citizen_name || "Citizen"
+        complaintText: evidenceData.complaintText || "Forensic photo attached",
+        imageBase64: evidenceData.dataUrl || null,
+        latitude: evidenceData.latitude || 12.9716,
+        longitude: evidenceData.longitude || 77.5946,
+        citizen_name: "Rajesh Gowda (Citizen)"
       });
 
-      // Open Citizen Triage Review Modal for inspection and dispatch options
       setReviewModalData({
         triageResult: triage,
-        originalInput: complaintData.citizen_text,
-        evidence: complaintData.evidence,
-        complaintData
+        evidence: evidenceData,
+        complaintText: evidenceData.complaintText
       });
-
     } catch (err) {
-      console.error('Triage failed:', err);
-      alert('Error triaging hazard. Please retry.');
+      console.error('Triage error:', err);
+      alert('Error triaging complaint.');
     } finally {
-      setIsSubmitting(false);
+      setIsTriaging(false);
     }
   };
 
-  // Called when citizen confirms dispatch in CitizenReviewModal (Social, Email, or Both)
-  const handleConfirmDispatch = (triageResult) => {
-    const { complaintData, evidence } = reviewModalData;
+  // Called when user completes dispatch in TriageReviewModal
+  const handleConfirmDispatch = (finalTriage) => {
+    const { evidence, complaintText } = reviewModalData;
 
     const newTicket = {
-      id: `TKT-${Math.floor(1000 + Math.random() * 9000)}`,
-      citizen_text: complaintData.citizen_text || "Evidence-based report",
-      detected_language: triageResult.detected_language,
-      category: triageResult.category || "roads",
-      severity: triageResult.severity || "Medium",
-      reason: triageResult.reason || triageResult.one_line_reason,
-      one_line_reason: triageResult.one_line_reason,
-      department: triageResult.department || "BBMP Municipal Corporation",
-      department_details: triageResult.department_details,
-      english_summary: triageResult.english_summary,
+      id: `CVL-${Math.floor(1000 + Math.random() * 9000)}`,
+      citizen_text: complaintText || "Forensic camera evidence",
+      detected_language: finalTriage.detected_language || "English",
+      category: finalTriage.category || "roads",
+      severity: finalTriage.severity || "Medium",
+      reason: finalTriage.one_line_reason || finalTriage.reason,
+      one_line_reason: finalTriage.one_line_reason,
+      department: finalTriage.department || "BBMP Municipal Corporation",
+      department_details: finalTriage.department_details,
+      english_summary: finalTriage.english_summary,
       status: 'Pending',
-      location: complaintData.location || 'Ward 174, Bengaluru',
-      citizen_name: complaintData.citizen_name || 'Citizen User',
-      citizen_phone: complaintData.citizen_phone || '+91 98XXX XXXXX',
+      location: `Ward 174, Bengaluru (GPS: ${evidence?.latitude?.toFixed(4) || '12.9716'}°, ${evidence?.longitude?.toFixed(4) || '77.5946'}°)`,
+      citizen_name: 'Rajesh Gowda',
+      citizen_phone: '+91 98451 23456',
       image_url: evidence?.dataUrl || null,
-      watermark_hash: evidence?.hash || '0x9E21B4F81E',
-      action_drafts: triageResult.action_drafts,
+      watermark_hash: evidence?.tamperSeal || 'CIVICLENS_SEAL_0x8F',
+      action_drafts: finalTriage.action_drafts,
       created_at: new Date().toISOString(),
-      action_recommendation: triageResult.action_recommendation || "Dispatch inspection squad.",
+      action_recommendation: finalTriage.action_recommendation || "Dispatch response crew.",
+      upvotes_count: 1,
       is_duplicate: false
     };
 
-    // Add to ticket registry
     setTickets((prev) => [newTicket, ...prev]);
-
-    // Close review modal & switch to Officer Dashboard
     setReviewModalData(null);
-    setRole('officer');
+    setActiveTab('priority'); // Jump to priority ranking
     setActiveModalTicket(newTicket);
 
-    // Sync with backend asynchronously
+    // Sync to backend
     fetch('/api/tickets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -137,61 +140,122 @@ export default function App() {
     if (activeModalTicket && activeModalTicket.id === id) {
       setActiveModalTicket((prev) => ({ ...prev, status: newStatus }));
     }
-
-    // Attempt backend update
-    fetch(`/api/tickets/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    }).catch(() => {});
   };
 
   const handleResetDemo = () => {
-    if (confirm('Reset CivicLens database to 3 initial demo tickets?')) {
+    if (confirm('Reset CivicLens database to initial demo tickets?')) {
       setTickets(initialDemoTickets);
       localStorage.removeItem('civiclens_tickets');
       fetch('/api/tickets/reset', { method: 'POST' }).catch(() => {});
+      setActiveTab('feed');
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f1] via-[#f0fbf7] to-[#f8fafc] text-[#0f172a] flex flex-col font-sans">
       
-      {/* Header & Role Switcher */}
-      <Header
-        currentRole={role}
-        onRoleChange={setRole}
-        onResetDemo={handleResetDemo}
+      {/* 1. Top Navbar: Sticky white bar */}
+      <CivicLensNavbar
+        userRole={viewMode}
+        onToggleUserRole={() => setViewMode(viewMode === 'citizen' ? 'officer' : 'citizen')}
+        onOpenLegal={() => setShowLegalShield(true)}
+        onOpenSettings={() => alert("CivicLens System Status: Online (Gemini Cascade Active, OpenStreetMap Free Tiles, GPS Lock OK)")}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8">
-        {role === 'citizen' ? (
-          <CitizenIntake
-            onSubmitComplaint={handleComplaintSubmit}
-            isSubmitting={isSubmitting}
-          />
-        ) : (
-          <OfficerDashboard
-            tickets={sortedTickets}
-            onUpdateStatus={handleUpdateStatus}
-            onSelectTicket={setActiveModalTicket}
-          />
-        )}
-      </main>
+      {/* 2. Sub-header: Dark pill toggle + Light pill toggle */}
+      <SubHeaderToggles
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        layoutMode={layoutMode}
+        onLayoutModeChange={setLayoutMode}
+      />
 
-      {/* Citizen Triage Review Modal with 3 Dispatch Options */}
+      {/* 3. App Container: Centered rounded frame (max-w-lg in mobile, max-w-5xl in web) */}
+      <div className={`w-full mx-auto px-2 sm:px-4 pb-8 transition-all duration-300 ${
+        layoutMode === 'mobile' ? 'max-w-lg' : 'max-w-5xl'
+      }`}>
+        <div className="bg-white rounded-3xl soft-card-shadow border border-emerald-100/90 overflow-hidden relative min-h-[80vh] flex flex-col justify-between">
+          
+          {/* Main Views Container */}
+          <div className="p-3.5 sm:p-5 flex-1">
+            {viewMode === 'officer' ? (
+              /* Officer Dashboard View */
+              <OfficerDashboard
+                tickets={sortedTickets}
+                onUpdateStatus={handleUpdateStatus}
+                onSelectTicket={setActiveModalTicket}
+              />
+            ) : (
+              /* Citizen 5-Tab Views */
+              <>
+                {activeTab === 'feed' && (
+                  <CivicFeedView
+                    tickets={sortedTickets}
+                    onOpenLens={() => setActiveTab('lens')}
+                    onSelectTicket={setActiveModalTicket}
+                  />
+                )}
+
+                {activeTab === 'priority' && (
+                  <CivicPriorityDeck
+                    tickets={sortedTickets}
+                    onSelectTicket={setActiveModalTicket}
+                    onQuickDispatch={(ticket) => {
+                      handleUpdateStatus(ticket.id, 'In Progress');
+                      alert(`Emergency crew dispatched for ${ticket.id} (${ticket.department})!`);
+                    }}
+                  />
+                )}
+
+                {activeTab === 'lens' && (
+                  <CivicLensView
+                    onCaptureConfirmed={handleEvidenceConfirmed}
+                  />
+                )}
+
+                {activeTab === 'map' && (
+                  <CivicLiveMapView
+                    tickets={sortedTickets}
+                    onSelectTicket={setActiveModalTicket}
+                  />
+                )}
+
+                {activeTab === 'tracker' && (
+                  <CivicTrackerView
+                    tickets={sortedTickets}
+                    onResetDemo={handleResetDemo}
+                  />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Sticky 5-Tab Bottom Navigation (Only in Citizen View) */}
+          {viewMode === 'citizen' && (
+            <CivicLensBottomNav
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
+          )}
+
+        </div>
+      </div>
+
+      {/* Review & Triage Modal */}
       {reviewModalData && (
-        <CitizenReviewModal
+        <TriageReviewModal
           triageResult={reviewModalData.triageResult}
-          originalInput={reviewModalData.originalInput}
           evidence={reviewModalData.evidence}
           onConfirmDispatch={handleConfirmDispatch}
+          onRetake={() => {
+            setReviewModalData(null);
+            setActiveTab('lens');
+          }}
           onClose={() => setReviewModalData(null)}
         />
       )}
 
-      {/* Ticket Inspection Modal */}
+      {/* Detailed Ticket Modal */}
       {activeModalTicket && (
         <TicketModal
           ticket={activeModalTicket}
@@ -200,25 +264,23 @@ export default function App() {
         />
       )}
 
-      {/* Mobile-first sticky bottom role bar */}
-      <nav className="sm:hidden sticky bottom-0 z-40 bg-[#0e131f]/95 border-t border-slate-800/80 px-4 py-2 flex items-center justify-around text-xs">
-        <button
-          onClick={() => setRole('citizen')}
-          className={`flex flex-col items-center gap-1 font-semibold ${
-            role === 'citizen' ? 'text-cyan-400' : 'text-slate-500'
-          }`}
-        >
-          <span>Citizen Portal</span>
-        </button>
-        <button
-          onClick={() => setRole('officer')}
-          className={`flex flex-col items-center gap-1 font-semibold ${
-            role === 'officer' ? 'text-cyan-400' : 'text-slate-500'
-          }`}
-        >
-          <span>Officer Center</span>
-        </button>
-      </nav>
+      {/* Legal Shield Modal */}
+      {showLegalShield && (
+        <LegalShieldModal
+          onClose={() => setShowLegalShield(false)}
+        />
+      )}
+
+      {/* Triage Loading Overlay */}
+      {isTriaging && (
+        <div className="fixed inset-0 z-50 bg-[#071713]/85 backdrop-blur-md flex flex-col items-center justify-center space-y-3">
+          <div className="w-12 h-12 rounded-full border-4 border-emerald-400/20 border-t-emerald-400 animate-spin"></div>
+          <div className="text-center">
+            <span className="font-bold text-sm text-white font-space">CivicLens AI Triaging...</span>
+            <p className="text-[11px] text-emerald-200">Processing visual evidence u/s 133 CrPC</p>
+          </div>
+        </div>
+      )}
 
     </div>
   );
