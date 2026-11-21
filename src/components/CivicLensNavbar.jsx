@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ShieldAlert, User, ShieldCheck, Settings, Info, Languages, LogIn, ChevronDown, Check, Building2, Train, Store } from 'lucide-react';
 import { getTranslation } from '../utils/i18n';
+import SpotNexLogo from './SpotnexLogo';
 
 export default function CivicLensNavbar({ 
   userRole, 
@@ -97,17 +98,13 @@ export default function CivicLensNavbar({
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-emerald-100/80 px-3 sm:px-4 py-2 shadow-xs">
       <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
         
-        {/* Brand Logo with Click-to-Priority Redirect */}
+        {/* Brand Logo with Click-to-Priority Redirect (Vector SVG, Zero Distortion) */}
         <div 
           onClick={onLogoClick}
           className="flex items-center cursor-pointer transition hover:opacity-95 active:scale-95 py-0.5" 
           title="SpotNex • Click to view Priority List"
         >
-          <img 
-            src="/spotnex-logo.png" 
-            alt="SpotNex AI Civic Connect" 
-            className="h-11 sm:h-13 md:h-14 w-auto object-contain drop-shadow-xs transition-transform hover:scale-105" 
-          />
+          <SpotNexLogo className="h-9 sm:h-11 md:h-12 w-auto drop-shadow-xs transition-transform hover:scale-105" />
         </div>
 
         {/* Center / Right: Regional Language Switcher Pill + Profile + Settings */}

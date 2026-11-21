@@ -1,120 +1,213 @@
 import React from 'react';
 
-export default function SpotNexLogo({ size = 36, showText = true, className = "" }) {
+/**
+ * SpotNex Brand Logo - Vector SVG Component
+ * Zero distortion, infinite scalability, crisp at all resolutions.
+ */
+export default function SpotNexLogo({ 
+  className = "h-11 w-auto", 
+  onClick = null,
+  showSubtitle = true 
+}) {
   return (
-    <div className={`inline-flex items-center gap-2.5 ${className}`}>
-      {/* SVG Map Pin with Aperture & Circuit Nodes */}
+    <div 
+      onClick={onClick} 
+      className={`inline-flex items-center select-none ${onClick ? 'cursor-pointer' : ''}`}
+      title="SpotNex • AI Civic Connect"
+    >
       <svg
-        width={size}
-        height={size}
-        viewBox="0 0 100 100"
+        viewBox="0 0 380 110"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="shrink-0 transition-transform hover:scale-105"
+        className={`object-contain ${className}`}
       >
         <defs>
-          {/* Orange/Coral Gradient for Left Pin */}
-          <linearGradient id="pinOrangeGrad" x1="15" y1="10" x2="50" y2="90" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#fb923c" />
-            <stop offset="50%" stopColor="#f97316" />
-            <stop offset="100%" stopColor="#ea580c" />
+          {/* Left Ribbon Gradient (Mint to Vibrant Emerald) */}
+          <linearGradient id="snxPinMintGrad" x1="10%" y1="10%" x2="90%" y2="90%">
+            <stop offset="0%" stopColor="#6ee7b7" />
+            <stop offset="25%" stopColor="#34d399" />
+            <stop offset="60%" stopColor="#10b981" />
+            <stop offset="100%" stopColor="#059669" />
           </linearGradient>
 
-          {/* Teal/Cyan Gradient for Right Pin */}
-          <linearGradient id="pinTealGrad" x1="85" y1="10" x2="50" y2="90" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#2dd4bf" />
-            <stop offset="50%" stopColor="#0d9488" />
-            <stop offset="100%" stopColor="#0f766e" />
+          {/* Right Outer Ribbon (Deep Civic Forest Green) */}
+          <linearGradient id="snxPinForestGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stopColor="#10b981" />
+            <stop offset="35%" stopColor="#047857" />
+            <stop offset="70%" stopColor="#065f46" />
+            <stop offset="100%" stopColor="#064e3b" />
           </linearGradient>
 
-          {/* Lens Outer Ring Gradient */}
-          <radialGradient id="lensRing" cx="50" cy="45" r="26" gradientUnits="userSpaceOnUse">
-            <stop offset="70%" stopColor="#071713" />
-            <stop offset="90%" stopColor="#0f291e" />
-            <stop offset="100%" stopColor="#10b981" />
+          {/* Pin Inner Loop Fold */}
+          <linearGradient id="snxPinInnerFold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#a7f3d0" />
+            <stop offset="50%" stopColor="#34d399" />
+            <stop offset="100%" stopColor="#059669" />
+          </linearGradient>
+
+          {/* Camera Lens / Iris Radial Gradient */}
+          <radialGradient id="snxLensIrisGrad" cx="44%" cy="42%" r="56%">
+            <stop offset="0%" stopColor="#064e3b" />
+            <stop offset="65%" stopColor="#033527" />
+            <stop offset="100%" stopColor="#022118" />
           </radialGradient>
 
-          {/* Glowing Node Filter */}
-          <filter id="nodeGlow" x="0" y="0" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
+          {/* Checkmark & Antenna Gradient */}
+          <linearGradient id="snxCheckGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#34d399" />
+            <stop offset="45%" stopColor="#10b981" />
+            <stop offset="85%" stopColor="#059669" />
+            <stop offset="100%" stopColor="#047857" />
+          </linearGradient>
+
+          {/* Leaf Gradient */}
+          <linearGradient id="snxLeafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#047857" />
+            <stop offset="50%" stopColor="#10b981" />
+            <stop offset="100%" stopColor="#34d399" />
+          </linearGradient>
+
+          {/* Wordmark 'nex' Gradient */}
+          <linearGradient id="snxNexTextGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#10b981" />
+            <stop offset="100%" stopColor="#059669" />
+          </linearGradient>
         </defs>
 
-        {/* 1. Circuit-Node Branches on Right Side */}
-        <g stroke="#0d9488" strokeWidth="2.5" strokeLinecap="round" opacity="0.95">
-          {/* Top branch */}
-          <path d="M72 32 L84 24" />
-          <circle cx="85" cy="23" r="3.5" fill="#2dd4bf" filter="url(#nodeGlow)" stroke="#0f766e" strokeWidth="1" />
-          
-          {/* Middle branch */}
-          <path d="M76 45 L91 45" />
-          <circle cx="92" cy="45" r="4" fill="#0d9488" filter="url(#nodeGlow)" stroke="#115e59" strokeWidth="1" />
-          
-          {/* Bottom branch */}
-          <path d="M72 58 L85 67" />
-          <circle cx="86" cy="68" r="3.5" fill="#14b8a6" filter="url(#nodeGlow)" stroke="#0f766e" strokeWidth="1" />
+        {/* 1. PIN EMBLEM */}
+        <g transform="translate(6, 4)">
+          {/* Right outer curved ribbon */}
+          <path
+            d="M 45 12
+               C 68 12, 86 28, 84 52
+               C 82 70, 63 86, 41 100
+               C 40 98, 39 91, 44 83
+               C 59 73, 71 59, 72 47
+               C 73 33, 61 22, 45 21
+               Z"
+            fill="url(#snxPinForestGrad)"
+          />
+
+          {/* Left outer ribbon loop */}
+          <path
+            d="M 41 100
+               C 29 86, 12 65, 12 45
+               C 12 25, 27 12, 45 12
+               C 58 12, 70 17, 77 26
+               C 71 20, 59 16, 45 17
+               C 30 17, 18 29, 18 45
+               C 18 62, 31 79, 41 100
+               Z"
+            fill="url(#snxPinMintGrad)"
+          />
+
+          {/* Inner fold ribbon highlighting the teardrop apex */}
+          <path
+            d="M 45 22
+               C 32 22, 22 32, 22 45
+               C 22 58, 32 72, 41 85
+               C 36 74, 28 61, 28 47
+               C 28 36, 35 27, 45 27
+               C 55 27, 64 34, 65 44
+               C 65 43, 65 42, 65 41
+               C 64 30, 55 22, 45 22
+               Z"
+            fill="url(#snxPinInnerFold)"
+            opacity="0.9"
+          />
+
+          {/* Camera Lens / Iris Background Disc */}
+          <circle cx="45" cy="46" r="23" fill="url(#snxLensIrisGrad)" />
+          {/* Outer glass rim reflection */}
+          <circle cx="45" cy="46" r="22.5" stroke="#34d399" strokeWidth="1.2" opacity="0.45" />
+
+          {/* Center pupil core */}
+          <circle cx="45" cy="46" r="11" fill="#03261c" />
+          <circle cx="45" cy="46" r="6" fill="#065f46" />
+          <circle cx="42.5" cy="43.5" r="2" fill="#ffffff" opacity="0.8" />
+
+          {/* Checkmark sweeping into IoT antenna */}
+          <path
+            d="M 31 46
+               L 41 57
+               L 67 31
+               L 83 17"
+            stroke="url(#snxCheckGrad)"
+            strokeWidth="7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Checkmark crisp inner specular line */}
+          <path
+            d="M 32 46
+               L 41 55
+               L 67 31"
+            stroke="#a7f3d0"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.85"
+          />
+
+          {/* IoT Network Terminal Node */}
+          <circle cx="83" cy="17" r="7.5" fill="#ffffff" stroke="#059669" strokeWidth="4.5" />
+          <circle cx="83" cy="17" r="2.5" fill="#10b981" />
         </g>
 
-        {/* 2. Main Map Pin Body (Teardrop shape) */}
-        {/* Left Half (Coral/Orange) */}
-        <path
-          d="M50 88 C43 78 20 58 20 42 C20 25.5 33.5 12 50 12 L50 88 Z"
-          fill="url(#pinOrangeGrad)"
-        />
+        {/* 2. WORDMARK: 'spotnex' (Single continuous word, zero gap) */}
+        <g transform="translate(108, 0)">
+          <text
+            x="0"
+            y="66"
+            fontFamily="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif"
+            fontSize="52"
+            fontWeight="900"
+            letterSpacing="-1.5"
+          >
+            <tspan fill="#064e3b">spot</tspan>
+            <tspan fill="url(#snxNexTextGrad)">nex</tspan>
+          </text>
 
-        {/* Right Half (Teal/Cyan) */}
-        <path
-          d="M50 12 C66.5 12 80 25.5 80 42 C80 58 57 78 50 88 L50 12 Z"
-          fill="url(#pinTealGrad)"
-        />
+          {/* Eco-Sprout Leaf atop 'x' */}
+          <g transform="translate(188, 21)">
+            {/* Leaf body */}
+            <path
+              d="M 1 18
+                 C 0 10, 11 3, 19 0
+                 C 22 9, 18 19, 8 22
+                 C 5 22, 2 20, 1 18
+                 Z"
+              fill="url(#snxLeafGrad)"
+            />
+            {/* Leaf central vein */}
+            <path
+              d="M 2 18 Q 11 11 18 2"
+              stroke="#ffffff"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              opacity="0.8"
+            />
+            {/* Node dot inside leaf */}
+            <circle cx="10" cy="12" r="1.5" fill="#ffffff" opacity="0.9" />
+          </g>
 
-        {/* Pin Border & Highlight */}
-        <path
-          d="M50 88 C43 78 20 58 20 42 C20 25.5 33.5 12 50 12 C66.5 12 80 25.5 80 42 C80 58 57 78 50 88 Z"
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth="2.5"
-          opacity="0.6"
-        />
-
-        {/* 3. Circular Camera Iris / Aperture Outer Bezel */}
-        <circle cx="50" cy="42" r="23" fill="url(#lensRing)" stroke="#10b981" strokeWidth="2.5" />
-        <circle cx="50" cy="42" r="19" fill="#071713" stroke="#2dd4bf" strokeWidth="1.2" opacity="0.8" />
-
-        {/* 4. Six Multitone Camera Aperture / Iris Blades */}
-        <g transform="translate(50, 42)">
-          {/* Blade 1 - Coral Orange */}
-          <path d="M0 -15 L10 -8 L4 0 Z" fill="#f97316" opacity="0.9" />
-          {/* Blade 2 - Rose Crimson */}
-          <path d="M10 -8 L13 5 L3 3 Z" fill="#e11d48" opacity="0.9" />
-          {/* Blade 3 - Deep Coral */}
-          <path d="M13 5 L3 13 L-1 4 Z" fill="#fb7185" opacity="0.9" />
-          {/* Blade 4 - Teal */}
-          <path d="M3 13 L-10 8 L-4 0 Z" fill="#0d9488" opacity="0.9" />
-          {/* Blade 5 - Cyan */}
-          <path d="M-10 8 L-13 -5 L-3 -3 Z" fill="#06b6d4" opacity="0.9" />
-          {/* Blade 6 - Emerald */}
-          <path d="M-13 -5 L-3 -13 L1 -4 Z" fill="#10b981" opacity="0.9" />
-          
-          {/* Center Aperture Pupil */}
-          <circle cx="0" cy="0" r="4.5" fill="#071713" stroke="#ffffff" strokeWidth="1" />
-          <circle cx="-1" cy="-1" r="1.5" fill="#ffffff" opacity="0.8" />
+          {/* 3. SUBTITLE: 'AI CIVIC CONNECT' */}
+          {showSubtitle && (
+            <text
+              x="2"
+              y="91"
+              fontFamily="'Space Grotesk', system-ui, -apple-system, monospace"
+              fontSize="11.5"
+              fontWeight="800"
+              fill="#064e3b"
+              letterSpacing="4.8"
+            >
+              AI CIVIC CONNECT
+            </text>
+          )}
         </g>
       </svg>
-
-      {/* Styled Brand Typography */}
-      {showText && (
-        <div className="flex flex-col leading-none">
-          <div className="flex items-center text-lg sm:text-xl font-black font-space tracking-tight">
-            <span className="text-[#f97316]">SPOT</span>
-            <span className="text-[#0d9488]">NEX</span>
-          </div>
-          <span className="text-[9px] font-mono-hud font-extrabold uppercase tracking-widest text-[#0d9488] mt-0.5">
-            AI CIVIC CONNECT
-          </span>
-        </div>
-      )}
     </div>
   );
 }

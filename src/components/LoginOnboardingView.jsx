@@ -3,7 +3,7 @@ import {
   Camera, ArrowRight, ShieldCheck, Eye, EyeOff, Lock, User, 
   Phone, Mail, CheckCircle2, ArrowLeft, Sparkles, Building2, ExternalLink 
 } from 'lucide-react';
-import SpotNexLogo from './SpotNexLogo';
+import SpotNexLogo from './SpotnexLogo';
 
 export default function LoginOnboardingView({ 
   onLoginSuccess, 
@@ -117,14 +117,10 @@ export default function LoginOnboardingView({
       {/* Centered White Rounded-3xl Login Card */}
       <div className="bg-white rounded-3xl soft-card-shadow border border-emerald-100/90 max-w-lg w-full p-5 sm:p-7 space-y-5 animate-in fade-in zoom-in-95 duration-200">
         
-        {/* 1. Header: SpotNex Logo & Tagline */}
+        {/* 1. Header: SpotNex Logo & Tagline (Zero-distortion Vector SVG) */}
         <div className="text-center space-y-2">
           <div className="flex justify-center py-2">
-            <img 
-              src="/spotnex-logo.png" 
-              alt="SpotNex AI Civic Connect" 
-              className="h-24 sm:h-32 w-auto max-w-[90%] object-contain drop-shadow-md transition-transform hover:scale-105" 
-            />
+            <SpotNexLogo className="h-20 sm:h-24 w-auto max-w-[90%] drop-shadow-md transition-transform hover:scale-105" />
           </div>
 
           <p className="text-xs sm:text-[13px] text-slate-600 font-medium leading-relaxed max-w-sm mx-auto">
