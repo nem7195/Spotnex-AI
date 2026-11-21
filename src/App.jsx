@@ -24,17 +24,24 @@ export default function App() {
   const [viewMode, setViewMode] = useState('citizen'); // 'citizen' | 'officer'
   const [layoutMode, setLayoutMode] = useState('mobile'); // 'mobile' | 'web'
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'priority' | 'lens' | 'map' | 'tracker'
+  const [currentLang, setCurrentLang] = useState('en'); // 'en' (default) | 'kn' | 'hi'
 
   const [tickets, setTickets] = useState(() => {
     const saved = localStorage.getItem('civiclens_tickets');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].image_url) {
+          return parsed;
+        }
+      } catch (e) { /* ignore */ }
     }
     return initialDemoTickets;
   });
 
   const [activeModalTicket, setActiveModalTicket] = useState(null);
   const [reviewModalData, setReviewModalData] = useState(null);
+  const [gatekeeperError, setGatekeeperError] = useState(null);
   const [showLegalShield, setShowLegalShield] = useState(false);
   const [isTriaging, setIsTriaging] = useState(false);
 
@@ -74,6 +81,17 @@ export default function App() {
         citizen_name: "Rajesh Gowda (Citizen)"
       });
 
+      // AI-Slop & Authenticity Gatekeeper Verification
+      if (triage.is_authentic === false) {
+        setGatekeeperError({
+          reason: triage.authenticity_reason || "Suspected AI-generated, synthetic, or non-authentic civic media.",
+          evidence: evidenceData
+        });
+        setActiveTab('lens');
+        return;
+      }
+
+      setGatekeeperError(null);
       setReviewModalData({
         triageResult: triage,
         evidence: evidenceData,
@@ -112,7 +130,9 @@ export default function App() {
       created_at: new Date().toISOString(),
       action_recommendation: finalTriage.action_recommendation || "Dispatch response crew.",
       upvotes_count: 1,
-      is_duplicate: false
+      is_duplicate: false,
+      is_authentic: true,
+      authenticity_badge: "AI-Verified Authentic"
     };
 
     setTickets((prev) => [newTicket, ...prev]);
@@ -154,12 +174,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e6f7f1] via-[#f0fbf7] to-[#f8fafc] text-[#0f172a] flex flex-col font-sans">
       
-      {/* 1. Top Navbar: Sticky white bar */}
+      {/* 1. Top Navbar: Sticky white bar with Regional Language Toggle */}
       <CivicLensNavbar
         userRole={viewMode}
         onToggleUserRole={() => setViewMode(viewMode === 'citizen' ? 'officer' : 'citizen')}
         onOpenLegal={() => setShowLegalShield(true)}
         onOpenSettings={() => alert("CivicLens System Status: Online (Gemini Cascade Active, OpenStreetMap Free Tiles, GPS Lock OK)")}
+        currentLang={currentLang}
+        onLanguageChange={setCurrentLang}
       />
 
       {/* 2. Sub-header: Dark pill toggle + Light pill toggle */}
@@ -168,6 +190,7 @@ export default function App() {
         onViewModeChange={setViewMode}
         layoutMode={layoutMode}
         onLayoutModeChange={setLayoutMode}
+        currentLang={currentLang}
       />
 
       {/* 3. App Container: Centered rounded frame (max-w-lg in mobile, max-w-5xl in web) */}
@@ -193,6 +216,7 @@ export default function App() {
                     tickets={sortedTickets}
                     onOpenLens={() => setActiveTab('lens')}
                     onSelectTicket={setActiveModalTicket}
+                    currentLang={currentLang}
                   />
                 )}
 
@@ -204,12 +228,16 @@ export default function App() {
                       handleUpdateStatus(ticket.id, 'In Progress');
                       alert(`Emergency crew dispatched for ${ticket.id} (${ticket.department})!`);
                     }}
+                    currentLang={currentLang}
                   />
                 )}
 
                 {activeTab === 'lens' && (
                   <CivicLensView
                     onCaptureConfirmed={handleEvidenceConfirmed}
+                    currentLang={currentLang}
+                    gatekeeperError={gatekeeperError}
+                    onClearGatekeeperError={() => setGatekeeperError(null)}
                   />
                 )}
 
@@ -217,6 +245,7 @@ export default function App() {
                   <CivicLiveMapView
                     tickets={sortedTickets}
                     onSelectTicket={setActiveModalTicket}
+                    currentLang={currentLang}
                   />
                 )}
 
@@ -224,6 +253,7 @@ export default function App() {
                   <CivicTrackerView
                     tickets={sortedTickets}
                     onResetDemo={handleResetDemo}
+                    currentLang={currentLang}
                   />
                 )}
               </>
@@ -235,6 +265,7 @@ export default function App() {
             <CivicLensBottomNav
               activeTab={activeTab}
               onTabChange={setActiveTab}
+              currentLang={currentLang}
             />
           )}
 
@@ -252,6 +283,7 @@ export default function App() {
             setActiveTab('lens');
           }}
           onClose={() => setReviewModalData(null)}
+          currentLang={currentLang}
         />
       )}
 

@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
-import { Flame, Clock, Building2, ArrowUp, Send, ChevronRight, Award, AlertTriangle } from 'lucide-react';
+import { Flame, Clock, Building2, ArrowUp, Send, ChevronRight, Award, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { getTranslation } from '../utils/i18n';
 
-export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDispatch }) {
+export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDispatch, currentLang = 'en' }) {
   const [sortBy, setSortBy] = useState('score'); // 'score' | 'severity' | 'sla'
+  const t = (k) => getTranslation(k, currentLang);
 
   // Severity Weights
   const sWeight = { Critical: 300, High: 200, Medium: 120, Low: 50 };
 
-  const scoredTickets = tickets.map((t) => {
-    const base = sWeight[t.severity] || 100;
-    const upvotes = t.upvotes_count || 16;
-    const urgency = t.severity === 'Critical' ? 60 : t.severity === 'High' ? 30 : 10;
+  const scoredTickets = tickets.map((tkt) => {
+    const base = sWeight[tkt.severity] || 100;
+    const upvotes = tkt.upvotes_count || 16;
+    const urgency = tkt.severity === 'Critical' ? 60 : tkt.severity === 'High' ? 30 : 10;
     const computedScore = base + (upvotes * 3) + urgency;
 
     return {
-      ...t,
+      ...tkt,
       computedScore
     };
   });
@@ -40,14 +42,14 @@ export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDisp
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded-full bg-red-600/90 text-[10px] font-extrabold uppercase font-mono-hud text-white tracking-wider flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
-              LIVE RANKING
+              {t('priority_live_badge')}
             </span>
           </div>
           <h2 className="text-base font-extrabold font-space">
-            Municipal Priority Queue
+            {t('priority_title')}
           </h2>
           <p className="text-[11px] text-slate-400">
-            Triaged by urgency factor u/s 133 CrPC and hazard severity
+            {t('priority_subtitle')}
           </p>
         </div>
 
@@ -58,7 +60,7 @@ export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDisp
 
       {/* 2. SORT BY Pills */}
       <div className="flex items-center justify-between px-1 text-xs">
-        <span className="text-slate-500 font-mono-hud font-bold text-[11px]">SORT BY:</span>
+        <span className="text-slate-500 font-mono-hud font-bold text-[11px]">{t('priority_sort_label')}</span>
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setSortBy('score')}
@@ -68,7 +70,7 @@ export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDisp
                 : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
             }`}
           >
-            Priority Score
+            {t('priority_sort_score')}
           </button>
           <button
             onClick={() => setSortBy('severity')}
@@ -78,7 +80,7 @@ export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDisp
                 : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
             }`}
           >
-            Severity
+            {t('priority_sort_severity')}
           </button>
           <button
             onClick={() => setSortBy('sla')}
@@ -88,7 +90,7 @@ export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDisp
                 : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
             }`}
           >
-            SLA Urgency
+            {t('priority_sort_sla')}
           </button>
         </div>
       </div>
@@ -138,6 +140,11 @@ export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDisp
                     {ticket.category}
                   </span>
 
+                  <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-0.5">
+                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-600" />
+                    <span>AI-Verified</span>
+                  </span>
+
                   <span className="ml-auto font-mono-hud text-xs font-bold text-[#0b6e4f]">
                     {ticket.computedScore} PTS
                   </span>
@@ -157,7 +164,7 @@ export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDisp
                 <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[10px] font-mono-hud text-slate-500">
                   <div className="flex items-center gap-1 text-amber-600 font-semibold">
                     <Clock className="w-3 h-3" />
-                    <span>SLA: {isCritical ? '<2h' : '<12h'}</span>
+                    <span>{t('priority_sla_prefix')} {isCritical ? '<2h' : '<12h'}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -174,7 +181,7 @@ export default function CivicPriorityDeck({ tickets, onSelectTicket, onQuickDisp
                       className="px-2 py-0.5 rounded-md bg-[#0b6e4f] text-white font-bold hover:bg-[#10b981] transition flex items-center gap-0.5 active:scale-95"
                     >
                       <Send className="w-2.5 h-2.5" />
-                      <span>Dispatch</span>
+                      <span>{t('priority_dispatch_btn')}</span>
                     </button>
                   </div>
                 </div>

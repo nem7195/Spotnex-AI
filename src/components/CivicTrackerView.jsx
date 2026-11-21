@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Search, CheckCircle2, Clock, ShieldAlert, ArrowRight, RotateCcw, Building2 } from 'lucide-react';
+import { getTranslation } from '../utils/i18n';
 
-export default function CivicTrackerView({ tickets, onResetDemo }) {
+export default function CivicTrackerView({ tickets, onResetDemo, currentLang = 'en' }) {
   const [searchId, setSearchId] = useState('');
+  const t = (k) => getTranslation(k, currentLang);
 
   const selectedTicket = searchId.trim()
-    ? tickets.find(t => t.id.toLowerCase().includes(searchId.toLowerCase().trim())) || tickets[0]
+    ? tickets.find(tkt => tkt.id.toLowerCase().includes(searchId.toLowerCase().trim())) || tickets[0]
     : tickets[0];
 
   const milestones = [
@@ -23,7 +25,7 @@ export default function CivicTrackerView({ tickets, onResetDemo }) {
       <div className="p-4 rounded-3xl bg-white border border-emerald-100/90 soft-card-shadow space-y-2.5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-[#071713] font-space">
-            Civic Ticket Status Tracker
+            {t('tracker_title')}
           </h2>
           <span className="font-mono-hud text-[10px] text-[#0b6e4f] font-bold">
             LIVE ESCALATION AUDIT
@@ -37,7 +39,7 @@ export default function CivicTrackerView({ tickets, onResetDemo }) {
             type="text"
             value={searchId}
             onChange={(e) => setSearchId(e.target.value)}
-            placeholder="Search Ticket ID (e.g. TKT-1001, SPX-1002)..."
+            placeholder={t('tracker_search_placeholder')}
             className="w-full bg-slate-50 border border-emerald-100 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0b6e4f]"
           />
         </div>

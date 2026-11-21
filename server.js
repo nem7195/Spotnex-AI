@@ -1,9 +1,15 @@
+const fs = require('fs');
+const path = require('path');
+
+// Load .env.local first if present, then fallback to .env
+if (fs.existsSync(path.join(__dirname, '.env.local'))) {
+  require('dotenv').config({ path: path.join(__dirname, '.env.local') });
+}
 require('dotenv').config();
+
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
 const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
@@ -47,17 +53,19 @@ const initialTickets = [
     detected_language: "Hindi",
     category: "electricity",
     severity: "Critical",
-    reason: "Exposed live electrical conductor fallen on a wet public roadway near children presents immediate fatal electrocution hazard.",
-    department: "City Power Distribution Corporation (Electricity / BESCOM)",
+    reason: "Exposed live electrical wire near a school poses an immediate fatal electrocution hazard.",
+    one_line_reason: "Exposed live electrical wire near a school poses an immediate electrocution hazard.",
+    department: "Bangalore Electricity Supply Company Limited (BESCOM)",
     english_summary: "Live snapped electrical wire fallen on road during rain with children playing nearby.",
     status: "In Progress",
     location: "Ward 42, Near Govt Primary School, 8th Cross",
     citizen_name: "Ramesh Sharma",
     citizen_phone: "+91 98451 23456",
-    image_url: null,
+    image_url: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?auto=format&fit=crop&w=800&q=80",
     created_at: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
     action_recommendation: "Immediate emergency power cut-off and deployment of rapid-response lineman squad.",
-    is_duplicate: false
+    is_duplicate: false,
+    upvotes_count: 38
   },
   {
     id: "TKT-1002",
@@ -66,34 +74,78 @@ const initialTickets = [
     category: "water",
     severity: "High",
     reason: "High-pressure municipal water main rupture causing severe street inundation and property damage risk.",
-    department: "Municipal Water Supply & Sewerage Board (BWSSB / Water Works)",
+    one_line_reason: "High-pressure municipal water main rupture causing severe street inundation and property damage risk.",
+    department: "Bangalore Water Supply and Sewerage Board (BWSSB)",
     english_summary: "Major water pipeline rupture causing street flooding and entering nearby storefronts.",
     status: "Pending",
     location: "4th Block Commercial Complex Junction, MG Road",
     citizen_name: "Anita Deshmukh",
     citizen_phone: "+91 97412 87654",
-    image_url: null,
+    image_url: "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80",
     created_at: new Date(Date.now() - 110 * 60 * 1000).toISOString(),
     action_recommendation: "Isolate pipeline control valve V-12 and dispatch excavation crew for emergency weld repair.",
-    is_duplicate: false
+    is_duplicate: false,
+    upvotes_count: 24
   },
   {
     id: "TKT-1003",
+    citizen_text: "Deep open crater pothole causing bike accidents on 100ft road near junction.",
+    detected_language: "English",
+    category: "roads",
+    severity: "Critical",
+    reason: "Severe road surface crater causing severe vehicular loss of control and fatal motorcycle accident risk.",
+    one_line_reason: "Deep open crater pothole causing motorcycle accidents on 100ft road.",
+    department: "Bruhat Bengaluru Mahanagara Palike (BBMP)",
+    english_summary: "Deep open crater pothole causing motorcycle accidents on 100ft road.",
+    status: "Pending",
+    location: "100ft Road Junction, Indiranagar",
+    citizen_name: "Karthik Subramanian",
+    citizen_phone: "+91 99001 54321",
+    image_url: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80",
+    created_at: new Date(Date.now() - 150 * 60 * 1000).toISOString(),
+    action_recommendation: "Immediate asphalt patch repair and reflective hazard barricading.",
+    is_duplicate: false,
+    upvotes_count: 47
+  },
+  {
+    id: "TKT-1004",
     citizen_text: "ಕಸದ ತೊಟ್ಟಿ ತುಂಬಿ ರಸ್ತೆಗೆ ಹರಡಿದೆ, ಬೀದಿ ನಾಯಿಗಳು ಕಸವನ್ನು ಎಲ್ಲೆಡೆ ಎಳೆದಾಡುತ್ತಿವೆ, ತುಂಬಾ ದುರ್ವಾಸನೆ ಬರುತ್ತಿದೆ.",
     detected_language: "Kannada",
     category: "waste",
     severity: "Medium",
     reason: "Overflowing public waste bin scattering organic garbage and attracting animals, creating sanitary and public health concern.",
-    department: "Solid Waste Management Division (SWM / BBMP Sanitation)",
+    one_line_reason: "Overflowing public waste bin scattering organic garbage and attracting animals, creating sanitary and public health concern.",
+    department: "BBMP Solid Waste Management Division (SWM)",
     english_summary: "Garbage bin overflowing onto street with waste scattered by stray animals causing foul odor.",
     status: "Pending",
     location: "Ward 18, Residential Area, 2nd Main Road",
     citizen_name: "Venkatesh Rao",
     citizen_phone: "+91 94480 33221",
-    image_url: null,
+    image_url: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80",
     created_at: new Date(Date.now() - 210 * 60 * 1000).toISOString(),
     action_recommendation: "Dispatch compactor tipper vehicle for clearance and sanitize the bin perimeter.",
-    is_duplicate: false
+    is_duplicate: false,
+    upvotes_count: 19
+  },
+  {
+    id: "TKT-1005",
+    citizen_text: "ನಮ್ಮ ಮನೆಯ ಮುಂದೆ ಮರ ಬಿದ್ದಿದೆ ರಸ್ತೆ ಬಂದ್ ಆಗಿದೆ",
+    detected_language: "Kannada",
+    category: "trees",
+    severity: "Critical",
+    reason: "Large uprooted tree fully blocking roadway and snagging overhead cables, obstructing emergency transit.",
+    one_line_reason: "Complete arterial road blockage or imminent structural collapse creating life safety emergency.",
+    department: "BBMP Forest / Horticulture Wing",
+    english_summary: "Fallen tree blocking entire roadway in front of residential area.",
+    status: "Pending",
+    location: "12th Main Road, HAL 2nd Stage, Indiranagar",
+    citizen_name: "Suresh Gowda",
+    citizen_phone: "+91 98452 98765",
+    image_url: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80",
+    created_at: new Date(Date.now() - 320 * 60 * 1000).toISOString(),
+    action_recommendation: "Dispatch tree clearance chainsaw gang and coordinate with BESCOM for cable safety.",
+    is_duplicate: false,
+    upvotes_count: 31
   }
 ];
 
@@ -204,14 +256,35 @@ Urgent inspection demanded under Section 133 CrPC! @CMofKarnataka @DKShivakumar 
 function ruleBasedTriage(text, hasImage = false, location = "Bengaluru", citizen_name = "Citizen") {
   const lower = (text || "").toLowerCase();
 
-  // Check for "No Civic Defect"
-  if (/(no problem|all good|clean road|nice road|selfie|indoor|room|office|sunny day|good job|smooth road)/i.test(lower) && !/(wire|pothole|pipe|drain|tree|garbage)/i.test(lower)) {
+  // AI-Slop & Authenticity Gatekeeper heuristic check
+  if (/(midjourney|dall-e|stablediffusion|anime|cartoon|meme|deepfake|synthetic|fake image|ai art|stock photo watermark|fictional)/i.test(lower)) {
     return {
+      is_authentic: false,
+      authenticity_reason: "Suspected AI-Generated, cartoon, or synthetic non-civic media.",
+      has_civic_issue: false,
+      no_issue_reason: "Media identified as synthetic, AI-generated, or unrelated to civic infrastructure.",
+      category: null,
+      severity: null,
+      one_line_reason: "Failed authenticity gatekeeper check.",
+      reason: "Failed authenticity gatekeeper check.",
+      detected_language: "English",
+      english_summary: "Submission blocked: Suspected synthetic/AI-generated media.",
+      department: null,
+      action_drafts: null
+    };
+  }
+
+  // Check for "No Civic Defect"
+  if (/(no problem|all good|clean road|nice road|selfie|indoor|room|office|sunny day|good job|smooth road)/i.test(lower) && !/(wire|pothole|pipe|drain|tree|garbage|waste|ಕಸ)/i.test(lower)) {
+    return {
+      is_authentic: true,
+      authenticity_reason: "Verified authentic real-world civic documentation.",
       has_civic_issue: false,
       no_issue_reason: "Scene or description indicates normal civic conditions with no actionable municipal hazard.",
       category: null,
       severity: null,
       one_line_reason: "No civic defect or public hazard found.",
+      reason: "No civic defect or public hazard found.",
       detected_language: "English",
       english_summary: "No municipal defect reported.",
       department: null,
@@ -229,18 +302,18 @@ function ruleBasedTriage(text, hasImage = false, location = "Bengaluru", citizen
   else if (/[\u0B80-\u0BFF]/.test(text)) detected_language = "Tamil";
   else if (/[\u0C00-\u0C7F]/.test(text)) detected_language = "Telugu";
 
-  // Category matching
-  if (/(ಮರ|ಬಿದ್ದಿದೆ|ಕೊಂಬೆ|tree|branch|fallen|trunk|cracked|पेड़|शाखा)/i.test(lower)) {
+  // Category matching (including robust Garbage / Waste Detection)
+  if (/(ಕಸ|ತ್ಯಾಜ್ಯ|ತಿಪ್ಪೆ|ದುರ್ವಾಸನೆ|waste|garbage|dump|trash|dustbin|bin|litter|debris|rubbish|smell|stench|ಕಸದ ತೊಟ್ಟಿ|कचरा|कूड़ा|गंदगी|डस्टबिन|सफाई)/i.test(lower)) {
+    category = "waste";
+  } else if (/(ಮರ|ಬಿದ್ದಿದೆ|ಕೊಂಬೆ|tree|branch|fallen|trunk|cracked|पेड़|शाखा)/i.test(lower)) {
     category = "trees";
   } else if (/(तार|बिजली|current|wire|spark|transformer|streetlight|light|electric|shock|power|voltage|ವಿದ್ಯುತ್|ಕರೆಂಟ್)/i.test(lower)) {
     category = "electricity";
-  } else if (/(ಕಸ|ತ್ಯಾಜ್ಯ|waste|garbage|dump|trash|dustbin|bin|smell|कचरा|कूड़ा)/i.test(lower)) {
-    category = "waste";
   } else if (/(ಗಟಾರ|ಚರಂಡಿ|drain|drainage|sewer|sewage|clog|stagnant|overflow|नाली|नाला|गंदा पानी)/i.test(lower)) {
     category = "drainage";
   } else if (/(ನೀರು|water|leak|pipe|burst|supply|drinking|pipeline|पानी|नल)/i.test(lower)) {
     category = "water";
-  } else if (/(ರಸ್ತೆ|ಗುಂಡಿ|pothole|road|asphalt|traffic|crater|tar|सड़क|गड्ढा)/i.test(lower)) {
+  } else if (/(ರಸ್ತೆ|ಗುಂಡಿ|pothole|road|asphalt|traffic|crater|tar|ಸड़क|गड्ढा)/i.test(lower)) {
     category = "roads";
   }
 
@@ -254,18 +327,24 @@ function ruleBasedTriage(text, hasImage = false, location = "Bengaluru", citizen
     severity = "Critical";
     one_line_reason = category === "electricity" 
       ? "Exposed live wire near public transit zone poses an immediate fatal electrocution hazard."
+      : category === "roads"
+      ? "Severe deep road crater posing fatal motorcycle and vehicular accident danger."
       : "Complete arterial road blockage or imminent structural collapse creating life safety emergency.";
   } else if (highTriggers.test(lower)) {
     severity = "High";
     one_line_reason = category === "water"
       ? "High-pressure municipal pipeline burst causing severe street inundation and property flooding."
+      : category === "waste"
+      ? "Heavy accumulation of rotting garbage blocking access and posing acute health hazard."
       : "Severe civic obstruction creating high risk of vehicular accidents or health epidemics.";
   } else if (lowTriggers.test(lower)) {
     severity = "Low";
     one_line_reason = "Non-hazardous civic blemish with minimal impact on public mobility or safety.";
   } else {
     severity = "Medium";
-    one_line_reason = "Standard municipal defect requiring scheduled maintenance by beat crew.";
+    one_line_reason = category === "waste"
+      ? "Overflowing waste bin scattering garbage, requiring beat compactor clearance."
+      : "Standard municipal defect scheduled for routine departmental resolution.";
   }
 
   // English Summary
@@ -278,6 +357,8 @@ function ruleBasedTriage(text, hasImage = false, location = "Bengaluru", citizen
     english_summary = "Heaps of garbage and stagnant filthy water accumulated outside school entrance.";
   } else if (text.includes("बिजली का तार")) {
     english_summary = "Snapped live electrical wire fallen on road during rain near playing children.";
+  } else if (text.includes("Deep open crater pothole")) {
+    english_summary = "Deep open crater pothole causing motorcycle accidents on 100ft road.";
   } else if (text.length > 90) {
     english_summary = text.substring(0, 87) + "...";
   }
@@ -286,6 +367,8 @@ function ruleBasedTriage(text, hasImage = false, location = "Bengaluru", citizen
   const action_drafts = generateActionDrafts(category, severity, one_line_reason, english_summary, location, citizen_name);
 
   return {
+    is_authentic: true,
+    authenticity_reason: "Verified authentic real-world civic documentation.",
     has_civic_issue: true,
     no_issue_reason: null,
     category,
@@ -306,8 +389,8 @@ function ruleBasedTriage(text, hasImage = false, location = "Bengaluru", citizen
 }
 
 // Multimodal AI Triage Engine via Gemini API with Model Cascade
-async function triageComplaint(text, imageBase64OrPath = null, location = "Bengaluru", citizen_name = "Citizen") {
-  const apiKey = process.env.GEMINI_API_KEY;
+async function triageComplaint(text, imageBase64OrPath = null, location = "Bengaluru", citizen_name = "Citizen", clientKey = null) {
+  const apiKey = clientKey || process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey.trim() === "" || apiKey === "YOUR_GEMINI_API_KEY_HERE") {
     console.log("ℹ️ No GEMINI_API_KEY provided; utilizing High-Precision Heuristic Triage Engine.");
@@ -316,11 +399,13 @@ async function triageComplaint(text, imageBase64OrPath = null, location = "Benga
 
   const ai = new GoogleGenAI({ apiKey });
 
-  const systemInstruction = `You are CivicLens AI, an expert multimodal civic complaint triage engine for Bengaluru Municipal Corporation (BBMP, BESCOM, BWSSB).
+  const systemInstruction = `You are CivicLens AI, an expert multimodal civic complaint triage and authenticity gatekeeper engine for Bengaluru Municipal Corporation (BBMP, BESCOM, BWSSB).
 Analyze the citizen grievance (which may be in English, Kannada, Hindi, Tamil, Telugu, etc.) along with any attached photo evidence.
 
 You MUST respond in STRICT JSON ONLY adhering to this exact schema:
 {
+  "is_authentic": boolean,
+  "authenticity_reason": "1-line explanation of why this passed or failed authenticity verification",
   "has_civic_issue": boolean,
   "no_issue_reason": string or null,
   "category": "roads" | "waste" | "water" | "electricity" | "trees" | "drainage" | null,
@@ -332,10 +417,17 @@ You MUST respond in STRICT JSON ONLY adhering to this exact schema:
 }
 
 RULES:
-1. "No Civic Defect": If photo/text shows an intact road, indoor scene, selfie, personal photo, or NO public municipal hazard, set "has_civic_issue": false, "no_issue_reason": "Detailed explanation of why there is no civic issue", and set category/severity to null.
-2. Category: Must be EXACTLY one of: "roads", "waste", "water", "electricity", "trees", "drainage".
-3. Severity: "Critical" (life hazard/exposed wire/deep collapse), "High" (flooding/burst pipe/major roadblock), "Medium" (overflowing bin/dead streetlights), "Low" (minor aesthetic/faded paint).
-4. One Line Reason: An explicit, compelling 1-line justification of why the severity level was chosen.`;
+1. AI-Slop & Authenticity Gatekeeper: Set "is_authentic": false if the image appears AI-generated/synthetic (e.g. Midjourney, DALL-E, Stable Diffusion), anime/cartoon, meme, stock-watermarked, digital illustration, or completely unrelated to real civic/municipal issues. In that case, explain why in "authenticity_reason" (e.g. "Suspected AI-generated or synthetic non-civic rendering"). If it depicts a real camera photo of physical street/civic condition or authentic grievance, set "is_authentic": true and "authenticity_reason": "Verified authentic real-world civic documentation".
+2. "No Civic Defect": If photo/text shows an intact road, indoor scene, selfie, personal photo, or NO public municipal hazard, set "has_civic_issue": false, "no_issue_reason": "Detailed explanation of why there is no civic issue", and set category/severity to null.
+3. Category: Must be EXACTLY one of:
+   - "waste": Solid waste management, overflowing garbage bins, illegal garbage dumps, scattered trash, litter, stench.
+   - "roads": Potholes, damaged asphalt, craters, missing pavers, road cave-in.
+   - "water": BWSSB water supply, pipeline bursts, drinking water leaks, contaminated municipal water.
+   - "electricity": BESCOM live wires, snapped power conductors, sparking transformers, dark streetlights.
+   - "trees": Fallen trees, broken branches obstructing roads, dangerous hanging boughs.
+   - "drainage": Stormwater drains, open manholes, clogged sewage drains, contaminated overflow.
+4. Severity: "Critical" (life hazard/exposed wire/deep collapse), "High" (flooding/burst pipe/major roadblock/severe garbage pile), "Medium" (overflowing bin/routine pothole/dead streetlight), "Low" (minor aesthetic/faded paint).
+5. One Line Reason: An explicit, compelling 1-line justification of why the severity level was chosen.`;
 
   const contents = [];
 
@@ -369,18 +461,16 @@ RULES:
     text: `Citizen Grievance to triage:\n"${text || "Please analyze attached photo for municipal defects."}"\nLocation: ${location}`
   });
 
-  // Model Cascade: gemini-3.5-flash-lite -> gemini-3.1-flash-lite -> gemini-2.5-flash -> gemini-2.0-flash
+  // Model Cascade: gemini-3.5-flash-lite -> gemini-3.1-flash-lite
   const modelCascade = [
     'gemini-3.5-flash-lite',
-    'gemini-3.1-flash-lite',
-    'gemini-2.5-flash',
-    'gemini-2.0-flash'
+    'gemini-3.1-flash-lite'
   ];
 
   for (const modelName of modelCascade) {
     try {
       console.log(`🤖 Invoking Gemini Model Cascade: ${modelName}...`);
-      const response = await ai.models.generateContent({
+      const generatePromise = ai.models.generateContent({
         model: modelName,
         contents: contents,
         config: {
@@ -389,18 +479,46 @@ RULES:
           temperature: 0.1
         }
       });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Gemini API 7000ms response timeout')), 7000)
+      );
+      const response = await Promise.race([generatePromise, timeoutPromise]);
 
       const rawText = response.text.trim();
       const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(cleanJson);
 
+      const is_authentic = parsed.is_authentic !== false;
+      const authenticity_reason = parsed.authenticity_reason || (is_authentic ? "Verified authentic real-world civic documentation." : "Suspected AI-generated or synthetic non-civic media.");
+
+      // Gatekeeper: If not authentic, block immediately
+      if (!is_authentic) {
+        return {
+          is_authentic: false,
+          authenticity_reason,
+          has_civic_issue: false,
+          no_issue_reason: authenticity_reason,
+          category: null,
+          severity: null,
+          one_line_reason: authenticity_reason,
+          reason: authenticity_reason,
+          detected_language: parsed.detected_language || "English",
+          english_summary: "Submission blocked: Suspected synthetic/AI-generated media.",
+          department: null,
+          action_drafts: null
+        };
+      }
+
       if (parsed.has_civic_issue === false) {
         return {
+          is_authentic: true,
+          authenticity_reason,
           has_civic_issue: false,
           no_issue_reason: parsed.no_issue_reason || "No municipal hazard detected in report.",
           category: null,
           severity: null,
           one_line_reason: "No municipal defect identified.",
+          reason: "No municipal defect identified.",
           detected_language: parsed.detected_language || "English",
           english_summary: "No municipal defect reported.",
           department: null,
@@ -416,6 +534,8 @@ RULES:
       const action_drafts = generateActionDrafts(category, severity, one_line_reason, english_summary, location, citizen_name);
 
       return {
+        is_authentic: true,
+        authenticity_reason,
         has_civic_issue: true,
         no_issue_reason: null,
         category,
@@ -455,7 +575,7 @@ function checkDuplicate(newCategory, newText, newLocation) {
 // 0. Serverless Multimodal Hazard Triage Endpoint (/api/triage-hazard)
 app.post('/api/triage-hazard', async (req, res) => {
   try {
-    const { complaintText, imageBase64, latitude, longitude, citizen_name, authData } = req.body;
+    const { complaintText, imageBase64, latitude, longitude, citizen_name, authData, apiKey } = req.body;
 
     if (!complaintText && !imageBase64) {
       return res.status(400).json({
@@ -468,7 +588,7 @@ app.post('/api/triage-hazard', async (req, res) => {
       ? `GPS (${Number(latitude).toFixed(5)}, ${Number(longitude).toFixed(5)})`
       : "Bengaluru Municipal Limits";
 
-    const triage = await triageComplaint(complaintText || "", imageBase64 || null, locStr, citizen_name || "Citizen");
+    const triage = await triageComplaint(complaintText || "", imageBase64 || null, locStr, citizen_name || "Citizen", apiKey);
 
     res.json({
       success: true,

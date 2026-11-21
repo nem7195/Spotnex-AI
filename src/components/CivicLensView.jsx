@@ -1,10 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, RefreshCw, MapPin, Sparkles, Mic, CheckCircle2, ShieldCheck, X } from 'lucide-react';
+import { Camera, RefreshCw, MapPin, Sparkles, Mic, CheckCircle2, ShieldCheck, Upload, AlertCircle } from 'lucide-react';
+import { getTranslation } from '../utils/i18n';
 
-export default function CivicLensView({ onCaptureConfirmed }) {
+export default function CivicLensView({ 
+  onCaptureConfirmed, 
+  currentLang = 'en', 
+  gatekeeperError = null, 
+  onClearGatekeeperError = null 
+}) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const t = (k) => getTranslation(k, currentLang);
 
   const [facingMode, setFacingMode] = useState('environment');
   const [geoData, setGeoData] = useState({ latitude: 12.9716, longitude: 77.5946, accuracy: 12.4 });
@@ -35,7 +43,7 @@ export default function CivicLensView({ onCaptureConfirmed }) {
     }
   }, []);
 
-  // WebRTC Camera stream
+  // WebRTC Camera stream with 1080p ideal wider FOV
   useEffect(() => {
     if (!isWebRTCAllowed) {
       setCameraError('Non-secure context (HTTP). Direct mobile snap enabled.');
@@ -52,8 +60,8 @@ export default function CivicLensView({ onCaptureConfirmed }) {
       const constraints = {
         video: {
           facingMode: { ideal: facingMode },
-          width: { ideal: 1280 },
-          height: { ideal: 960 }
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
         },
         audio: false
       };
@@ -88,8 +96,8 @@ export default function CivicLensView({ onCaptureConfirmed }) {
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        const w = img.naturalWidth || img.width || 1200;
-        const h = img.naturalHeight || img.height || 1600;
+        const w = img.naturalWidth || img.width || 1920;
+        const h = img.naturalHeight || img.height || 1080;
         canvas.width = w;
         canvas.height = h;
 
@@ -102,13 +110,13 @@ export default function CivicLensView({ onCaptureConfirmed }) {
         const lngStr = `${geoData.longitude.toFixed(5)}`;
         const accStr = `${Math.round(geoData.accuracy)}`;
 
-        const boxH = Math.round(h * 0.15);
+        const boxH = Math.round(h * 0.16);
         const boxY = h - boxH - 20;
         const boxX = 20;
         const boxW = w - 40;
 
         // Dark obsidian backplate
-        ctx.fillStyle = 'rgba(7, 23, 19, 0.90)';
+        ctx.fillStyle = 'rgba(7, 23, 19, 0.92)';
         ctx.fillRect(boxX, boxY, boxW, boxH);
 
         // Emerald border
@@ -126,10 +134,10 @@ export default function CivicLensView({ onCaptureConfirmed }) {
         ctx.fillText('CIVICLENS • FORENSIC EVIDENCE HUD', boxX + (fontSize * 1.2), boxY + (boxH * 0.3));
 
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(`GPS: ${latStr}° N, ${lngStr}° E (±${accStr}m)`, boxX + (fontSize * 1.2), boxY + (boxH * 0.55));
+        ctx.fillText(`GPS: ${latStr}° N, ${lngStr}° E (±${accStr}m)`, boxX + (fontSize * 1.2), boxY + (boxH * 0.58));
 
         ctx.fillStyle = '#94A3B8';
-        ctx.font = `500 ${Math.round(fontSize * 0.85)}px monospace`;
+        ctx.font = `500 ${Math.round(fontSize * 0.82)}px monospace`;
         ctx.fillText(`IST: ${istString} (BENGALURU) | UTC: ${isoUTC}`, boxX + (fontSize * 1.2), boxY + (boxH * 0.85));
 
         resolve({
@@ -154,6 +162,7 @@ export default function CivicLensView({ onCaptureConfirmed }) {
   };
 
   const handleShutter = async () => {
+    if (onClearGatekeeperError) onClearGatekeeperError();
     if (!videoRef.current || cameraError) {
       fileInputRef.current?.click();
       return;
@@ -163,8 +172,8 @@ export default function CivicLensView({ onCaptureConfirmed }) {
     try {
       const video = videoRef.current;
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 960;
+      canvas.width = video.videoWidth || 1920;
+      canvas.height = video.videoHeight || 1080;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const rawUrl = canvas.toDataURL('image/jpeg', 0.95);
@@ -179,6 +188,7 @@ export default function CivicLensView({ onCaptureConfirmed }) {
   };
 
   const handleNativeFile = async (e) => {
+    if (onClearGatekeeperError) onClearGatekeeperError();
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     setIsProcessing(true);
@@ -204,7 +214,7 @@ export default function CivicLensView({ onCaptureConfirmed }) {
       return;
     }
     const recognition = new SpeechRecognition();
-    recognition.lang = 'hi-IN';
+    recognition.lang = currentLang === 'kn' ? 'kn-IN' : currentLang === 'hi' ? 'hi-IN' : 'en-IN';
     recognition.onstart = () => setIsRecording(true);
     recognition.onresult = (e) => {
       const t = e.results[0][0].transcript;
@@ -219,8 +229,10 @@ export default function CivicLensView({ onCaptureConfirmed }) {
     if (capturedPhoto || complaintText.trim()) {
       stopCamera();
       onCaptureConfirmed({
-        ...capturedPhoto,
-        complaintText
+        ...(capturedPhoto || {}),
+        complaintText: complaintText.trim(),
+        latitude: capturedPhoto?.latitude || geoData.latitude,
+        longitude: capturedPhoto?.longitude || geoData.longitude
       });
     } else {
       alert("Please take a photo or enter a complaint description.");
@@ -228,9 +240,9 @@ export default function CivicLensView({ onCaptureConfirmed }) {
   };
 
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-4 pb-20">
       
-      {/* Hidden file input */}
+      {/* Hidden native camera/file picker fallback */}
       <input
         ref={fileInputRef}
         type="file"
@@ -239,6 +251,44 @@ export default function CivicLensView({ onCaptureConfirmed }) {
         onChange={handleNativeFile}
         className="hidden"
       />
+
+      {/* AI-Slop & Authenticity Gatekeeper Alert Banner */}
+      {gatekeeperError && (
+        <div className="p-4 rounded-3xl bg-red-50 border-2 border-red-500 shadow-md space-y-3 animate-in fade-in duration-200">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-2xl bg-red-600 text-white shrink-0 mt-0.5 shadow-sm">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black font-space text-red-700 uppercase tracking-wide">
+                  {t('gatekeeper_blocked_title')}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-red-200 text-red-900 font-mono-hud text-[10px] font-bold">
+                  AI GATEKEEPER
+                </span>
+              </div>
+              <p className="text-xs text-red-800 font-medium leading-relaxed">
+                {gatekeeperError.reason || "The submitted image or text appears synthetic, AI-generated, or not an authentic civic hazard. CivicLens requires genuine live footage or legitimate civic complaints."}
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-1 flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (onClearGatekeeperError) onClearGatekeeperError();
+                setCapturedPhoto(null);
+                if (isWebRTCAllowed && !cameraError) startCamera();
+              }}
+              className="flex-1 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs font-space uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition active:scale-95"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>{t('gatekeeper_retake_btn')}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {capturedPhoto ? (
         /* Sealed Evidence Preview Screen */
@@ -251,7 +301,8 @@ export default function CivicLensView({ onCaptureConfirmed }) {
             <span className="font-mono-hud text-[10px] text-emerald-700">{capturedPhoto.tamperSeal}</span>
           </div>
 
-          <div className="relative aspect-[3/4] max-h-[58vh] rounded-3xl overflow-hidden border border-emerald-500/40 bg-black shadow-md">
+          {/* Full-width 100% viewfinder photo preview */}
+          <div className="relative w-full aspect-[4/3] min-h-[360px] rounded-3xl overflow-hidden border border-emerald-500/40 bg-black shadow-md">
             <img src={capturedPhoto.dataUrl} alt="Sealed Evidence" className="w-full h-full object-cover" />
           </div>
 
@@ -264,40 +315,41 @@ export default function CivicLensView({ onCaptureConfirmed }) {
               }}
               className="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition"
             >
-              Retake
+              {t('lens_retake')}
             </button>
             <button
               onClick={handleConfirm}
               className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#0b6e4f] to-[#10b981] text-white font-extrabold text-xs uppercase tracking-wider shadow-md shadow-emerald-700/20 transition flex items-center justify-center gap-1.5"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Confirm &amp; Analyze</span>
+              <span>{t('lens_confirm_triage')}</span>
             </button>
           </div>
         </div>
       ) : (
-        /* Live Camera / Viewfinder */
-        <div className="space-y-3">
+        /* Live Camera / Viewfinder - Full Width & Wider FOV */
+        <div className="space-y-3.5">
           
-          {/* Rounded Camera Viewfinder with Green Corner-Bracket Reticles */}
-          <div className="relative aspect-[3/4] max-h-[56vh] rounded-3xl overflow-hidden bg-[#071713] border border-emerald-500/30 shadow-md flex flex-col justify-between">
+          {/* 1. Full-Width Camera Viewfinder (w-full aspect-[4/3] min-h-[380px]) */}
+          <div className="relative w-full aspect-[4/3] min-h-[380px] rounded-3xl overflow-hidden bg-[#071713] border border-emerald-500/30 shadow-md flex flex-col justify-between">
             
             {/* Top Translucent Dark GPS Coordinate Pills */}
-            <div className="relative z-10 p-3 flex items-center justify-between gap-1.5 bg-gradient-to-b from-black/80 to-transparent">
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#071713]/85 backdrop-blur-md border border-emerald-500/40 text-[10px] font-mono-hud text-slate-200">
-                <MapPin className="w-3 h-3 text-emerald-400" />
+            <div className="relative z-10 p-3.5 flex items-center justify-between gap-1.5 bg-gradient-to-b from-black/80 to-transparent">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#071713]/85 backdrop-blur-md border border-emerald-500/40 text-[11px] font-mono-hud text-slate-200">
+                <MapPin className="w-3.5 h-3.5 text-emerald-400" />
                 <span>GPS {geoData.latitude.toFixed(4)}°N, {geoData.longitude.toFixed(4)}°E</span>
               </div>
 
               <div className="flex items-center gap-1.5">
-                <span className="px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-400/60 text-[10px] font-mono-hud text-emerald-300">
-                  ±12m Precision
+                <span className="px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-400/60 text-[10px] font-mono-hud text-emerald-300">
+                  {t('lens_precision')}
                 </span>
 
                 {isWebRTCAllowed && !cameraError && (
                   <button
                     onClick={flipCamera}
-                    className="p-1 rounded-full bg-slate-900/80 text-white hover:text-emerald-300"
+                    className="p-1.5 rounded-full bg-slate-900/80 text-white hover:text-emerald-300 transition"
+                    title="Flip Camera"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                   </button>
@@ -305,7 +357,7 @@ export default function CivicLensView({ onCaptureConfirmed }) {
               </div>
             </div>
 
-            {/* Video stream or fallback trigger */}
+            {/* Video stream with object-cover and 1080p FOV or fallback trigger */}
             {isWebRTCAllowed && !cameraError ? (
               <video
                 ref={videoRef}
@@ -316,13 +368,13 @@ export default function CivicLensView({ onCaptureConfirmed }) {
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-3 z-0">
-                <Camera className="w-12 h-12 text-emerald-400 animate-pulse" />
+                <Camera className="w-14 h-14 text-emerald-400 animate-pulse" />
                 <p className="text-xs text-slate-300 px-4">
                   {cameraError || "Tap to snap photo directly with mobile camera."}
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0b6e4f] to-[#10b981] text-white font-bold text-xs shadow-md"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0b6e4f] to-[#10b981] text-white font-bold text-xs shadow-md"
                 >
                   📸 Tap to Snap Photo Directly
                 </button>
@@ -331,79 +383,41 @@ export default function CivicLensView({ onCaptureConfirmed }) {
 
             {/* Center Reticle: Green corner-bracket reticles */}
             <div className="relative z-10 flex-1 flex flex-col items-center justify-center pointer-events-none">
-              <div className="w-44 h-44 sm:w-48 sm:h-48 border-2 border-dashed border-emerald-400/40 rounded-2xl relative flex items-center justify-center">
-                <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-[#10b981]"></div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-[#10b981]"></div>
-                <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-[#10b981]"></div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-[#10b981]"></div>
-                <span className="text-[10px] text-white/80 bg-black/50 px-2 py-0.5 rounded font-space backdrop-blur-xs">
-                  Center defect in frame
+              <div className="w-52 h-44 sm:w-60 sm:h-52 border-2 border-dashed border-emerald-400/40 rounded-2xl relative flex items-center justify-center">
+                <div className="absolute -top-1.5 -left-1.5 w-5 h-5 border-t-2 border-l-2 border-[#10b981]"></div>
+                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 border-t-2 border-r-2 border-[#10b981]"></div>
+                <div className="absolute -bottom-1.5 -left-1.5 w-5 h-5 border-b-2 border-l-2 border-[#10b981]"></div>
+                <div className="absolute -bottom-1.5 -right-1.5 w-5 h-5 border-b-2 border-r-2 border-[#10b981]"></div>
+                <span className="text-[10px] text-white/90 bg-black/60 px-2.5 py-1 rounded font-space backdrop-blur-xs">
+                  {t('lens_reticle_hint')}
                 </span>
               </div>
             </div>
 
             {/* Bottom HUD Bar */}
-            <div className="relative z-10 p-2 text-center bg-gradient-to-t from-black/80 to-transparent">
-              <span className="text-[9px] font-mono-hud text-slate-300 bg-black/60 px-3 py-0.5 rounded-full border border-white/10">
-                Hardware Sensor Lock: Active
+            <div className="relative z-10 p-2.5 text-center bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between px-4">
+              <span className="text-[10px] font-mono-hud text-slate-300 bg-black/60 px-3 py-0.5 rounded-full border border-white/10">
+                {t('lens_wide_fov')}
+              </span>
+              <span className="text-[10px] font-mono-hud text-emerald-400 bg-black/60 px-3 py-0.5 rounded-full border border-emerald-500/30">
+                {t('lens_tamper_locked')}
               </span>
             </div>
 
           </div>
 
-          {/* Quick Demo Scenario Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+          {/* 2. Shutter & Photo Upload Controls Bar */}
+          <div className="flex items-center justify-center gap-6 py-1">
             <button
-              onClick={() => setComplaintText("ನಮ್ಮ ಮನೆಯ ಮುಂದೆ ಮರ ಬಿದ್ದಿದೆ ರಸ್ತೆ ಬಂದ್ ಆಗಿದೆ")}
-              className="shrink-0 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#0b6e4f] font-semibold hover:bg-emerald-100 transition"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-3 rounded-2xl bg-white border border-emerald-200 text-slate-700 hover:text-[#0b6e4f] shadow-xs active:scale-95 transition flex flex-col items-center"
+              title="Upload Photo from Device"
             >
-              🌳 ಕನ್ನಡ: Fallen Tree
+              <Upload className="w-4 h-4 text-[#0b6e4f]" />
+              <span className="text-[9px] font-space font-bold mt-0.5">{t('lens_upload_btn')}</span>
             </button>
-            <button
-              onClick={() => setComplaintText("Exposed live wire sparking near school gate")}
-              className="shrink-0 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 font-semibold hover:bg-red-100 transition"
-            >
-              ⚡ Live Wire Sparking
-            </button>
-            <button
-              onClick={() => setComplaintText("Deep open crater pothole causing bike accidents on 100ft road")}
-              className="shrink-0 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-semibold hover:bg-amber-100 transition"
-            >
-              🛣️ Crater Pothole
-            </button>
-          </div>
 
-          {/* Clean Free-Text Complaint Input Below */}
-          <div className="rounded-2xl bg-white border border-emerald-100 p-3 shadow-xs space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-[#071713] font-space flex items-center gap-1.5">
-                <span>Complaint Description (Free Text)</span>
-                <span className="text-emerald-600 text-[10px]">• Multilingual</span>
-              </label>
-
-              <button
-                type="button"
-                onClick={toggleSpeech}
-                className={`p-1.5 rounded-lg border transition ${
-                  isRecording ? 'bg-red-100 border-red-400 text-red-600 animate-pulse' : 'bg-slate-100 border-slate-200 text-slate-600'
-                }`}
-                title="Voice Input"
-              >
-                <Mic className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <textarea
-              rows={2}
-              value={complaintText}
-              onChange={(e) => setComplaintText(e.target.value)}
-              placeholder="Describe in English, ಕನ್ನಡ, हिंदी... (or snap photo directly)"
-              className="w-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none resize-none leading-relaxed"
-            />
-          </div>
-
-          {/* Large Circular Green Shutter Button */}
-          <div className="flex items-center justify-center pt-1">
+            {/* Large Circular Green Shutter Button */}
             <button
               onClick={handleShutter}
               disabled={isProcessing}
@@ -414,6 +428,89 @@ export default function CivicLensView({ onCaptureConfirmed }) {
                 <Camera className="w-7 h-7 text-[#0b6e4f]" />
               </div>
             </button>
+
+            <button
+              onClick={flipCamera}
+              className="p-3 rounded-2xl bg-white border border-emerald-200 text-slate-700 hover:text-[#0b6e4f] shadow-xs active:scale-95 transition flex flex-col items-center"
+              title="Flip Camera View"
+            >
+              <RefreshCw className="w-4 h-4 text-[#0b6e4f]" />
+              <span className="text-[9px] font-space font-bold mt-0.5">{t('lens_flip_btn')}</span>
+            </button>
+          </div>
+
+          {/* 3. Quick Demo Scenario Chips */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+            <button
+              onClick={() => setComplaintText("ನಮ್ಮ ಮನೆಯ ಮುಂದೆ ಮರ ಬಿದ್ದಿದೆ ರಸ್ತೆ ಬಂದ್ ಆಗಿದೆ")}
+              className="shrink-0 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#0b6e4f] font-semibold hover:bg-emerald-100 transition"
+            >
+              {t('chip_fallen_tree')}
+            </button>
+            <button
+              onClick={() => setComplaintText("Exposed live wire sparking near school gate")}
+              className="shrink-0 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 font-semibold hover:bg-red-100 transition"
+            >
+              {t('chip_live_wire')}
+            </button>
+            <button
+              onClick={() => setComplaintText("Deep open crater pothole causing bike accidents on 100ft road")}
+              className="shrink-0 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-semibold hover:bg-amber-100 transition"
+            >
+              {t('chip_crater')}
+            </button>
+            <button
+              onClick={() => setComplaintText("ಕಸದ ತೊಟ್ಟಿ ತುಂಬಿ ರಸ್ತೆಗೆ ಹರಡಿದೆ, ತುಂಬಾ ದುರ್ವಾಸನೆ ಬರುತ್ತಿದೆ")}
+              className="shrink-0 px-2.5 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-yellow-800 font-semibold hover:bg-yellow-100 transition"
+            >
+              {t('chip_garbage')}
+            </button>
+          </div>
+
+          {/* 4. Clean, Always-Accessible Free-Text Complaint Input (Textarea) */}
+          <div className="rounded-3xl bg-white border border-emerald-100/90 p-4 soft-card-shadow space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-[#071713] font-space flex items-center gap-1.5">
+                <span>{t('lens_free_text_label')}</span>
+                <span className="text-emerald-600 text-[10px] font-semibold">{t('lens_multilingual_tag')}</span>
+              </label>
+
+              <button
+                type="button"
+                onClick={toggleSpeech}
+                className={`p-1.5 rounded-xl border transition ${
+                  isRecording ? 'bg-red-100 border-red-400 text-red-600 animate-pulse' : 'bg-slate-100 border-slate-200 text-slate-600'
+                }`}
+                title="Voice Input"
+              >
+                <Mic className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <textarea
+              rows={3}
+              value={complaintText}
+              onChange={(e) => setComplaintText(e.target.value)}
+              placeholder={t('lens_textarea_placeholder')}
+              className="w-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none resize-none leading-relaxed border-none p-0"
+            />
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <span className="text-[10px] text-slate-400 font-mono-hud flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                {t('lens_support_text')}
+              </span>
+
+              {/* Direct Triage Execution Button */}
+              <button
+                onClick={handleConfirm}
+                disabled={isProcessing}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0b6e4f] to-[#10b981] hover:from-[#09583f] hover:to-[#0ea573] text-white font-extrabold text-xs shadow-md shadow-emerald-700/20 active:scale-95 transition flex items-center gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{t('lens_run_triage_btn')}</span>
+              </button>
+            </div>
           </div>
 
         </div>

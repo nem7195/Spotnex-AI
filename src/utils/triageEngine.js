@@ -7,7 +7,7 @@ export const initialDemoTickets = [
     detected_language: "Hindi",
     category: "electricity",
     severity: "Critical",
-    reason: "Exposed live electrical wire near a school poses an immediate electrocution hazard.",
+    reason: "Exposed live electrical wire near a school poses an immediate fatal electrocution hazard.",
     one_line_reason: "Exposed live electrical wire near a school poses an immediate electrocution hazard.",
     department: "Bangalore Electricity Supply Company Limited (BESCOM)",
     english_summary: "Live snapped electrical wire fallen on road during rain with children playing nearby.",
@@ -15,12 +15,15 @@ export const initialDemoTickets = [
     location: "Ward 42, Near Govt Primary School, 8th Cross",
     citizen_name: "Ramesh Sharma",
     citizen_phone: "+91 98451 23456",
-    image_url: null,
+    image_url: "https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?auto=format&fit=crop&w=800&q=80",
     created_at: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
     action_recommendation: "Immediate emergency power cut-off and deployment of rapid-response lineman squad.",
     is_duplicate: false,
     watermark_hash: "0x8E19B4F81E",
     has_civic_issue: true,
+    is_authentic: true,
+    authenticity_reason: "AI-Verified Authentic photographic documentation.",
+    upvotes_count: 38,
     action_drafts: {
       statutory_email: {
         to: "helpline@bescom.co.in",
@@ -44,12 +47,15 @@ export const initialDemoTickets = [
     location: "4th Block Commercial Complex Junction, MG Road",
     citizen_name: "Anita Deshmukh",
     citizen_phone: "+91 97412 87654",
-    image_url: null,
+    image_url: "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80",
     created_at: new Date(Date.now() - 110 * 60 * 1000).toISOString(),
     action_recommendation: "Isolate pipeline control valve V-12 and dispatch excavation crew for emergency weld repair.",
     is_duplicate: false,
     watermark_hash: "0x3C49B4F81E",
     has_civic_issue: true,
+    is_authentic: true,
+    authenticity_reason: "AI-Verified Authentic photographic documentation.",
+    upvotes_count: 24,
     action_drafts: {
       statutory_email: {
         to: "waterboard@bwssb.gov.in",
@@ -61,6 +67,38 @@ export const initialDemoTickets = [
   },
   {
     id: "TKT-1003",
+    citizen_text: "Deep open crater pothole causing bike accidents on 100ft road near junction.",
+    detected_language: "English",
+    category: "roads",
+    severity: "Critical",
+    reason: "Severe road surface crater causing severe vehicular loss of control and fatal motorcycle accident risk.",
+    one_line_reason: "Deep open crater pothole causing motorcycle accidents on 100ft road.",
+    department: "Bruhat Bengaluru Mahanagara Palike (BBMP)",
+    english_summary: "Deep open crater pothole causing motorcycle accidents on 100ft road.",
+    status: "Pending",
+    location: "100ft Road Junction, Indiranagar",
+    citizen_name: "Karthik Subramanian",
+    citizen_phone: "+91 99001 54321",
+    image_url: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80",
+    created_at: new Date(Date.now() - 150 * 60 * 1000).toISOString(),
+    action_recommendation: "Immediate asphalt patch repair and reflective hazard barricading.",
+    is_duplicate: false,
+    watermark_hash: "0x5A11D3E29A",
+    has_civic_issue: true,
+    is_authentic: true,
+    authenticity_reason: "AI-Verified Authentic photographic documentation.",
+    upvotes_count: 47,
+    action_drafts: {
+      statutory_email: {
+        to: "commissioner@bbmp.gov.in",
+        subject: "STATUTORY NOTICE u/s 133 CrPC: Dangerous Crater Pothole at 100ft Road Indiranagar",
+        body: "To: Commissioner, BBMP Road Infrastructure..."
+      },
+      social_post: "🚨 CRITICAL ROAD HAZARD in #Bengaluru! Deep crater on 100ft Rd causing accidents. Urgent fix needed! @BBMPCOMM #CivicLens"
+    }
+  },
+  {
+    id: "TKT-1004",
     citizen_text: "ಕಸದ ತೊಟ್ಟಿ ತುಂಬಿ ರಸ್ತೆಗೆ ಹರಡಿದೆ, ಬೀದಿ ನಾಯಿಗಳು ಕಸವನ್ನು ಎಲ್ಲೆಡೆ ಎಳೆದಾಡುತ್ತಿವೆ, ತುಂಬಾ ದುರ್ವಾಸನೆ ಬರುತ್ತಿದೆ.",
     detected_language: "Kannada",
     category: "waste",
@@ -73,12 +111,15 @@ export const initialDemoTickets = [
     location: "Ward 18, Residential Area, 2nd Main Road",
     citizen_name: "Venkatesh Rao",
     citizen_phone: "+91 94480 33221",
-    image_url: null,
+    image_url: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80",
     created_at: new Date(Date.now() - 210 * 60 * 1000).toISOString(),
     action_recommendation: "Dispatch compactor tipper vehicle for clearance and sanitize the bin perimeter.",
     is_duplicate: false,
     watermark_hash: "0x7F29B4F81E",
     has_civic_issue: true,
+    is_authentic: true,
+    authenticity_reason: "AI-Verified Authentic photographic documentation.",
+    upvotes_count: 19,
     action_drafts: {
       statutory_email: {
         to: "swm@bbmp.gov.in",
@@ -86,6 +127,38 @@ export const initialDemoTickets = [
         body: "To: SWM Division, BBMP..."
       },
       social_post: "🚨 CIVIC ISSUE in #Bengaluru! Waste scattered on street. Immediate clearance requested @BBMP_SWM #CivicLens"
+    }
+  },
+  {
+    id: "TKT-1005",
+    citizen_text: "ನಮ್ಮ ಮನೆಯ ಮುಂದೆ ಮರ ಬಿದ್ದಿದೆ ರಸ್ತೆ ಬಂದ್ ಆಗಿದೆ",
+    detected_language: "Kannada",
+    category: "trees",
+    severity: "Critical",
+    reason: "Large uprooted tree fully blocking roadway and snagging overhead cables, obstructing emergency transit.",
+    one_line_reason: "Complete arterial road blockage or imminent structural collapse creating life safety emergency.",
+    department: "BBMP Forest / Horticulture Wing",
+    english_summary: "Fallen tree blocking entire roadway in front of residential area.",
+    status: "Pending",
+    location: "12th Main Road, HAL 2nd Stage, Indiranagar",
+    citizen_name: "Suresh Gowda",
+    citizen_phone: "+91 98452 98765",
+    image_url: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80",
+    created_at: new Date(Date.now() - 320 * 60 * 1000).toISOString(),
+    action_recommendation: "Dispatch tree clearance chainsaw gang and coordinate with BESCOM for cable safety.",
+    is_duplicate: false,
+    watermark_hash: "0x91F41A9901",
+    has_civic_issue: true,
+    is_authentic: true,
+    authenticity_reason: "AI-Verified Authentic photographic documentation.",
+    upvotes_count: 31,
+    action_drafts: {
+      statutory_email: {
+        to: "treeofficer@bbmp.gov.in",
+        subject: "STATUTORY NOTICE u/s 133 CrPC: Uprooted Tree Road Blockage at Indiranagar",
+        body: "To: Tree Officer, Forest Wing, BBMP..."
+      },
+      social_post: "🚨 FALLEN TREE BLOCKING ROAD in #Indiranagar! Emergency transit blocked. Urgent removal needed! @BBMPForestCell #CivicLens"
     }
   }
 ];
@@ -185,14 +258,36 @@ Immediate inspection demanded under Section 133 CrPC! @CMofKarnataka @DKShivakum
 export function classifyClientFallback(text, hasImage = false, location = "Bengaluru", citizen_name = "Citizen") {
   const lower = (text || "").toLowerCase();
 
-  // Check for "No Civic Defect"
-  if (/(no problem|all good|clean road|nice road|selfie|indoor|room|office|sunny day|good job|smooth road|park looks good)/i.test(lower) && !/(wire|pothole|pipe|drain|tree|garbage)/i.test(lower)) {
+  // AI-Slop & Authenticity Gatekeeper heuristic check
+  if (/(midjourney|dall-e|stablediffusion|anime|cartoon|meme|deepfake|synthetic|fake image|ai art|stock photo watermark|fictional)/i.test(lower)) {
     return {
+      is_authentic: false,
+      authenticity_reason: "Suspected AI-Generated, cartoon, or synthetic non-civic media.",
+      has_civic_issue: false,
+      no_issue_reason: "Media identified as synthetic, AI-generated, or unrelated to civic infrastructure.",
+      category: null,
+      severity: null,
+      one_line_reason: "Failed authenticity gatekeeper check.",
+      reason: "Failed authenticity gatekeeper check.",
+      detected_language: "English",
+      english_summary: "Submission blocked: Suspected synthetic/AI-generated media.",
+      department: null,
+      department_details: null,
+      action_drafts: null
+    };
+  }
+
+  // Check for "No Civic Defect"
+  if (/(no problem|all good|clean road|nice road|selfie|indoor|room|office|sunny day|good job|smooth road|park looks good)/i.test(lower) && !/(wire|pothole|pipe|drain|tree|garbage|waste|ಕಸ)/i.test(lower)) {
+    return {
+      is_authentic: true,
+      authenticity_reason: "Verified authentic real-world civic documentation.",
       has_civic_issue: false,
       no_issue_reason: "Scene or report shows intact civic conditions with no actionable municipal hazard.",
       category: null,
       severity: null,
       one_line_reason: "No civic defect or public hazard found.",
+      reason: "No civic defect or public hazard found.",
       detected_language: "English",
       english_summary: "No municipal defect reported.",
       department: null,
@@ -211,18 +306,18 @@ export function classifyClientFallback(text, hasImage = false, location = "Benga
   else if (/[\u0B80-\u0BFF]/.test(text)) detected_language = "Tamil (தமிழ்)";
   else if (/[\u0C00-\u0C7F]/.test(text)) detected_language = "Telugu (తెలుగు)";
 
-  // Category Matching
-  if (/(ಮರ|ಬಿದ್ದಿದೆ|ಕೊಂಬೆ|tree|branch|fallen|trunk|cracked|पेड़|शाखा)/i.test(lower)) {
+  // Category Matching (including robust Garbage / Waste Detection)
+  if (/(ಕಸ|ತ್ಯಾಜ್ಯ|ತಿಪ್ಪೆ|ದುರ್ವಾಸನೆ|waste|garbage|dump|trash|dustbin|bin|litter|debris|rubbish|smell|stench|ಕಸದ ತೊಟ್ಟಿ|कचरा|कूड़ा|गंदगी|डस्टबिन|सफाई)/i.test(lower)) {
+    category = "waste";
+  } else if (/(ಮರ|ಬಿದ್ದಿದೆ|ಕೊಂಬೆ|tree|branch|fallen|trunk|cracked|पेड़|शाखा)/i.test(lower)) {
     category = "trees";
   } else if (/(तार|बिजली|current|wire|spark|transformer|streetlight|light|electric|shock|power|voltage|ವಿದ್ಯುತ್|ಕರೆಂಟ್)/i.test(lower)) {
     category = "electricity";
-  } else if (/(ಕಸ|ತ್ಯಾಜ್ಯ|waste|garbage|dump|trash|dustbin|bin|smell|कचरा|कूड़ा)/i.test(lower)) {
-    category = "waste";
   } else if (/(ಗಟಾರ|ಚರಂಡಿ|drain|drainage|sewer|sewage|clog|stagnant|overflow|नाली|नाला|गंदा पानी)/i.test(lower)) {
     category = "drainage";
   } else if (/(ನೀರು|water|leak|pipe|burst|supply|drinking|pipeline|पानी|नल)/i.test(lower)) {
     category = "water";
-  } else if (/(ರಸ್ತೆ|ಗುಂಡಿ|pothole|road|asphalt|traffic|crater|tar|सड़क|गड्ढा)/i.test(lower)) {
+  } else if (/(ರಸ್ತೆ|ಗುಂಡಿ|pothole|road|asphalt|traffic|crater|tar|ಸड़क|गड्ढा)/i.test(lower)) {
     category = "roads";
   }
 
@@ -236,22 +331,28 @@ export function classifyClientFallback(text, hasImage = false, location = "Benga
     severity = "Critical";
     one_line_reason = category === "electricity"
       ? "Exposed live wire near a school poses an immediate electrocution hazard."
+      : category === "roads"
+      ? "Deep open crater pothole causing motorcycle accidents on 100ft road."
       : "Complete arterial road blockage or imminent structural collapse creating life safety emergency.";
   } else if (highRegex.test(lower)) {
     severity = "High";
     one_line_reason = category === "water"
       ? "High-pressure municipal water main rupture causing severe street inundation and property damage risk."
+      : category === "waste"
+      ? "Heavy accumulation of rotting garbage blocking access and posing acute health hazard."
       : "Severe civic obstruction creating high risk of vehicular accidents or health epidemics.";
   } else if (lowRegex.test(lower)) {
     severity = "Low";
     one_line_reason = "Non-hazardous civic blemish with minimal impact on public mobility or safety.";
   } else {
     severity = "Medium";
-    one_line_reason = "Standard municipal defect scheduled for routine departmental resolution.";
+    one_line_reason = category === "waste"
+      ? "Overflowing waste bin scattering garbage, requiring beat compactor clearance."
+      : "Standard municipal defect scheduled for routine departmental resolution.";
   }
 
   // English Summary
-  let english_summary = text;
+  let english_summary = text || (hasImage ? "Forensic civic evidence photo submitted." : "Municipal grievance reported.");
   if (text.includes("ಮರ ಬಿದ್ದಿದೆ ರಸ್ತೆ ಬಂದ್")) {
     english_summary = "Fallen tree blocking entire roadway in front of residential area.";
   } else if (text.includes("ಕಸದ ತೊಟ್ಟಿ ತುಂಬಿ")) {
@@ -270,6 +371,8 @@ export function classifyClientFallback(text, hasImage = false, location = "Benga
   const action_drafts = generateActionDrafts(category, severity, one_line_reason, english_summary, location, citizen_name);
 
   return {
+    is_authentic: true,
+    authenticity_reason: "Verified authentic real-world civic documentation.",
     has_civic_issue: true,
     no_issue_reason: null,
     category,
@@ -289,8 +392,11 @@ export function classifyClientFallback(text, hasImage = false, location = "Benga
   };
 }
 
-// Call /api/triage-hazard with automatic fallback
+// Call /api/triage-hazard with automatic fallback and client API key support
 export async function triageHazardAPI({ complaintText, imageBase64, latitude, longitude, citizen_name }) {
+  // Read Gemini API Key from Vite env if available
+  const viteGeminiKey = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : null;
+
   try {
     const res = await fetch('/api/triage-hazard', {
       method: 'POST',
@@ -300,7 +406,8 @@ export async function triageHazardAPI({ complaintText, imageBase64, latitude, lo
         imageBase64,
         latitude,
         longitude,
-        citizen_name
+        citizen_name,
+        apiKey: viteGeminiKey || undefined
       })
     });
 

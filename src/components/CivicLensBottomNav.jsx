@@ -1,7 +1,10 @@
 import React from 'react';
 import { Newspaper, Flame, Camera, Map, CheckSquare } from 'lucide-react';
+import { getTranslation } from '../utils/i18n';
 
-export default function CivicLensBottomNav({ activeTab, onTabChange }) {
+export default function CivicLensBottomNav({ activeTab, onTabChange, currentLang = 'en' }) {
+  const t = (k) => getTranslation(k, currentLang);
+
   return (
     <div className="sticky bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-emerald-100/90 py-1.5 px-3 flex justify-around items-center shadow-lg rounded-b-3xl">
       
@@ -13,7 +16,7 @@ export default function CivicLensBottomNav({ activeTab, onTabChange }) {
         }`}
       >
         <Newspaper className="w-5 h-5" />
-        <span className="text-[10px] font-space font-medium">Feed</span>
+        <span className="text-[10px] font-space font-medium">{t('nav_feed')}</span>
       </button>
 
       {/* 2. Priority with RED NOTIFICATION DOT */}
@@ -28,7 +31,7 @@ export default function CivicLensBottomNav({ activeTab, onTabChange }) {
           {/* Red notification dot */}
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white ring-1 ring-red-400"></span>
         </div>
-        <span className="text-[10px] font-space font-medium">Priority</span>
+        <span className="text-[10px] font-space font-medium">{t('nav_priority')}</span>
       </button>
 
       {/* 3. LENS (Elevated circular green center camera button) */}
@@ -41,7 +44,7 @@ export default function CivicLensBottomNav({ activeTab, onTabChange }) {
           <Camera className="w-6 h-6 text-white" />
         </div>
         <span className="block text-center text-[9px] font-extrabold text-[#0b6e4f] mt-0.5 font-space tracking-wide">
-          LENS
+          {t('nav_lens')}
         </span>
       </button>
 
@@ -53,7 +56,7 @@ export default function CivicLensBottomNav({ activeTab, onTabChange }) {
         }`}
       >
         <Map className="w-5 h-5" />
-        <span className="text-[10px] font-space font-medium">Live Map</span>
+        <span className="text-[10px] font-space font-medium">{t('nav_map')}</span>
       </button>
 
       {/* 5. Tracker */}
@@ -64,7 +67,7 @@ export default function CivicLensBottomNav({ activeTab, onTabChange }) {
         }`}
       >
         <CheckSquare className="w-5 h-5" />
-        <span className="text-[10px] font-space font-medium">Tracker</span>
+        <span className="text-[10px] font-space font-medium">{t('nav_tracker')}</span>
       </button>
 
     </div>

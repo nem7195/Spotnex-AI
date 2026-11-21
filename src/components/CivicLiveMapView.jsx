@@ -1,14 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { Layers, MapPin, Zap, Droplets, Trash2, Milestone } from 'lucide-react';
+import { getTranslation } from '../utils/i18n';
 
-export default function CivicLiveMapView({ tickets, onSelectTicket }) {
+export default function CivicLiveMapView({ tickets, onSelectTicket, currentLang = 'en' }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const tileLayerRef = useRef(null);
+  const markersLayerRef = useRef(null);
 
   const [mapMode, setMapMode] = useState('pins'); // 'pins' | 'heat'
   const [tileTheme, setTileTheme] = useState('streets'); // 'streets' | 'satellite'
+
+  const t = (k) => getTranslation(k, currentLang);
 
   // Wards coordinates for JUMP TO feature
   const wardJumps = {
@@ -25,6 +29,10 @@ export default function CivicLiveMapView({ tickets, onSelectTicket }) {
   const waterCount = tickets.filter(t => t.category === 'water').length;
   const electricCount = tickets.filter(t => t.category === 'electricity' || t.category === 'trees').length;
 
+  const streetUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const satUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
+  // Initialize Map
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -42,60 +50,16 @@ export default function CivicLiveMapView({ tickets, onSelectTicket }) {
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Initial tile layer (Streets / Voyager or Satellite)
-    const streetUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-    const satUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-
     const currentUrl = tileTheme === 'satellite' ? satUrl : streetUrl;
     tileLayerRef.current = L.tileLayer(currentUrl, {
-      attribution: '&copy; OpenStreetMap contributors',
+      attribution: tileTheme === 'satellite' ? '&copy; Esri World Imagery' : '&copy; OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(map);
 
-    // Local Ward Boundary Outline (Dashed emerald polygon)
-    const wardBoundary = [
-      [12.9880, 77.5850],
-      [12.9940, 77.6350],
-      [12.9650, 77.6520],
-      [12.9320, 77.6410],
-      [12.9250, 77.5920],
-      [12.9550, 77.5750]
-    ];
-    L.polygon(wardBoundary, {
-      color: '#0b6e4f',
-      weight: 2,
-      dashArray: '5, 5',
-      fillColor: '#10b981',
-      fillOpacity: 0.06
-    }).addTo(map).bindPopup("<strong>Bengaluru Ward Jurisdiction</strong><br/>BBMP Zone");
+    // Create layer group for markers
+    markersLayerRef.current = L.layerGroup().addTo(map);
 
-    // Color-coded circular markers
-    const markers = [
-      { lat: 12.9785, lng: 77.5980, label: 'Snapped Live Wire Near School', category: 'electricity', sev: 'Critical', color: '#ef4444' },
-      { lat: 12.9640, lng: 77.6180, label: 'Main Pipeline Burst (Water Works)', category: 'water', sev: 'High', color: '#0284c7' },
-      { lat: 12.9510, lng: 77.6350, label: 'Deep Crater Pothole (100ft Road)', category: 'roads', sev: 'Critical', color: '#ef4444' },
-      { lat: 12.9380, lng: 77.6100, label: 'Garbage Dump Overflow (SWM)', category: 'waste', sev: 'Medium', color: '#eab308' },
-      { lat: 12.9620, lng: 77.6420, label: 'Fallen Banyan Tree on Sidewalk', category: 'trees', sev: 'Critical', color: '#10b981' }
-    ];
-
-    markers.forEach((m) => {
-      // Circular pin
-      const circle = L.circleMarker([m.lat, m.lng], {
-        radius: m.sev === 'Critical' ? 10 : 8,
-        fillColor: m.color,
-        color: '#ffffff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.85
-      }).addTo(map);
-
-      circle.bindPopup(`
-        <div style="font-family: 'Space Grotesk', sans-serif; font-size: 11px;">
-          <strong style="color: ${m.color};">${m.sev.toUpperCase()} • ${m.category.toUpperCase()}</strong>
-          <p style="margin: 3px 0 0; color: #fff;">${m.label}</p>
-        </div>
-      `);
-    });
+    renderPinsOrHeat();
 
     return () => {
       if (mapInstanceRef.current) {
@@ -103,7 +67,68 @@ export default function CivicLiveMapView({ tickets, onSelectTicket }) {
         mapInstanceRef.current = null;
       }
     };
+  }, []);
+
+  // Update tile layer smoothly when tileTheme changes
+  useEffect(() => {
+    if (mapInstanceRef.current && tileLayerRef.current) {
+      const currentUrl = tileTheme === 'satellite' ? satUrl : streetUrl;
+      tileLayerRef.current.setUrl(currentUrl);
+    }
   }, [tileTheme]);
+
+  // Update pins/heat when mapMode or tickets change
+  useEffect(() => {
+    renderPinsOrHeat();
+  }, [mapMode, tickets]);
+
+  const renderPinsOrHeat = () => {
+    if (!markersLayerRef.current || !mapInstanceRef.current) return;
+    markersLayerRef.current.clearLayers();
+
+    // Default sample markers
+    const baseMarkers = [
+      { id: "TKT-1001", lat: 12.9785, lng: 77.5980, label: 'Snapped Live Wire Near School', category: 'electricity', sev: 'Critical', color: '#ef4444' },
+      { id: "TKT-1002", lat: 12.9640, lng: 77.6180, label: 'Main Pipeline Burst (Water Works)', category: 'water', sev: 'High', color: '#0284c7' },
+      { id: "TKT-1003", lat: 12.9510, lng: 77.6350, label: 'Deep Crater Pothole (100ft Road)', category: 'roads', sev: 'Critical', color: '#ef4444' },
+      { id: "TKT-1004", lat: 12.9380, lng: 77.6100, label: 'Garbage Dump Overflow (SWM)', category: 'waste', sev: 'Medium', color: '#eab308' },
+      { id: "TKT-1005", lat: 12.9620, lng: 77.6420, label: 'Fallen Banyan Tree on Sidewalk', category: 'trees', sev: 'Critical', color: '#10b981' }
+    ];
+
+    if (mapMode === 'heat') {
+      // Heat Map Mode: Render soft-intensity gradient heat radii
+      baseMarkers.forEach((m) => {
+        const radius = m.sev === 'Critical' ? 450 : m.sev === 'High' ? 320 : 220;
+        L.circle([m.lat, m.lng], {
+          radius: radius,
+          fillColor: m.sev === 'Critical' ? '#ef4444' : m.sev === 'High' ? '#f59e0b' : '#10b981',
+          fillOpacity: 0.35,
+          color: 'transparent',
+          weight: 0
+        }).addTo(markersLayerRef.current);
+      });
+    } else {
+      // Pins Mode: High-contrast circular markers
+      baseMarkers.forEach((m) => {
+        const circle = L.circleMarker([m.lat, m.lng], {
+          radius: m.sev === 'Critical' ? 10 : 8,
+          fillColor: m.color,
+          color: '#ffffff',
+          weight: 2.5,
+          opacity: 1,
+          fillOpacity: 0.95
+        }).addTo(markersLayerRef.current);
+
+        circle.bindPopup(`
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 11px; padding: 4px;">
+            <strong style="color: ${m.color}; font-size: 12px;">${m.sev.toUpperCase()} • ${m.category.toUpperCase()}</strong>
+            <p style="margin: 4px 0 0; color: #1e293b; font-weight: 600;">${m.label}</p>
+            <span style="font-size: 10px; color: #64748b; font-family: monospace;">Location: Bengaluru Central Ward</span>
+          </div>
+        `);
+      });
+    }
+  };
 
   const jumpToWard = (coords) => {
     if (mapInstanceRef.current) {
@@ -119,32 +144,32 @@ export default function CivicLiveMapView({ tickets, onSelectTicket }) {
         <div className="p-2.5 rounded-2xl bg-white border border-emerald-100/80 soft-card-shadow text-center">
           <Milestone className="w-4 h-4 text-[#0b6e4f] mx-auto mb-1" />
           <div className="font-mono-hud font-bold text-xs text-slate-800">{roadsCount}</div>
-          <div className="text-[9px] text-slate-400 font-medium">Roads</div>
+          <div className="text-[9px] text-slate-400 font-medium">{t('map_stat_roads')}</div>
         </div>
 
         <div className="p-2.5 rounded-2xl bg-white border border-emerald-100/80 soft-card-shadow text-center">
           <Trash2 className="w-4 h-4 text-amber-600 mx-auto mb-1" />
           <div className="font-mono-hud font-bold text-xs text-slate-800">{wasteCount}</div>
-          <div className="text-[9px] text-slate-400 font-medium">Waste</div>
+          <div className="text-[9px] text-slate-400 font-medium">{t('map_stat_waste')}</div>
         </div>
 
         <div className="p-2.5 rounded-2xl bg-white border border-emerald-100/80 soft-card-shadow text-center">
           <Droplets className="w-4 h-4 text-sky-600 mx-auto mb-1" />
           <div className="font-mono-hud font-bold text-xs text-slate-800">{waterCount}</div>
-          <div className="text-[9px] text-slate-400 font-medium">Water</div>
+          <div className="text-[9px] text-slate-400 font-medium">{t('map_stat_water')}</div>
         </div>
 
         <div className="p-2.5 rounded-2xl bg-white border border-emerald-100/80 soft-card-shadow text-center">
           <Zap className="w-4 h-4 text-red-500 mx-auto mb-1" />
           <div className="font-mono-hud font-bold text-xs text-slate-800">{electricCount}</div>
-          <div className="text-[9px] text-slate-400 font-medium">Power</div>
+          <div className="text-[9px] text-slate-400 font-medium">{t('map_stat_power')}</div>
         </div>
       </div>
 
       {/* 2. JUMP TO Ward Pills */}
       <div className="space-y-1">
         <span className="text-[10px] font-bold text-slate-500 font-mono-hud uppercase px-1">
-          JUMP TO WARD:
+          {t('map_jump_label')}
         </span>
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
           {Object.entries(wardJumps).map(([wardName, coords]) => (
@@ -159,8 +184,8 @@ export default function CivicLiveMapView({ tickets, onSelectTicket }) {
         </div>
       </div>
 
-      {/* 3. Rounded Leaflet Map with Floating Dark Toggles */}
-      <div className="relative aspect-[4/3] sm:aspect-[16/10] min-h-[50vh] rounded-3xl overflow-hidden border border-emerald-200/80 shadow-md">
+      {/* 3. Clean Rounded Leaflet Map with Floating Dark Toggles */}
+      <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] min-h-[50vh] rounded-3xl overflow-hidden border border-emerald-200/80 shadow-md">
         
         {/* Map Container */}
         <div ref={mapContainerRef} className="w-full h-full min-h-[50vh]" />
@@ -172,19 +197,19 @@ export default function CivicLiveMapView({ tickets, onSelectTicket }) {
           <div className="bg-[#071713]/90 backdrop-blur-md p-0.5 rounded-xl border border-emerald-500/40 flex items-center shadow-lg text-[10px] font-space">
             <button
               onClick={() => setMapMode('pins')}
-              className={`px-2 py-0.5 rounded-lg font-bold transition ${
-                mapMode === 'pins' ? 'bg-[#10b981] text-[#071713]' : 'text-slate-300'
+              className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                mapMode === 'pins' ? 'bg-[#10b981] text-[#071713]' : 'text-slate-300 hover:text-white'
               }`}
             >
-              Pins
+              {t('map_mode_pins')}
             </button>
             <button
               onClick={() => setMapMode('heat')}
-              className={`px-2 py-0.5 rounded-lg font-bold transition ${
-                mapMode === 'heat' ? 'bg-[#10b981] text-[#071713]' : 'text-slate-300'
+              className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                mapMode === 'heat' ? 'bg-[#10b981] text-[#071713]' : 'text-slate-300 hover:text-white'
               }`}
             >
-              Heat
+              {t('map_mode_heat')}
             </button>
           </div>
 
@@ -192,19 +217,19 @@ export default function CivicLiveMapView({ tickets, onSelectTicket }) {
           <div className="bg-[#071713]/90 backdrop-blur-md p-0.5 rounded-xl border border-emerald-500/40 flex items-center shadow-lg text-[10px] font-space">
             <button
               onClick={() => setTileTheme('streets')}
-              className={`px-2 py-0.5 rounded-lg font-bold transition ${
-                tileTheme === 'streets' ? 'bg-[#0b6e4f] text-white' : 'text-slate-300'
+              className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                tileTheme === 'streets' ? 'bg-[#0b6e4f] text-white' : 'text-slate-300 hover:text-white'
               }`}
             >
-              Streets
+              {t('map_tile_streets')}
             </button>
             <button
               onClick={() => setTileTheme('satellite')}
-              className={`px-2 py-0.5 rounded-lg font-bold transition ${
-                tileTheme === 'satellite' ? 'bg-[#0b6e4f] text-white' : 'text-slate-300'
+              className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                tileTheme === 'satellite' ? 'bg-[#0b6e4f] text-white' : 'text-slate-300 hover:text-white'
               }`}
             >
-              Satellite
+              {t('map_tile_satellite')}
             </button>
           </div>
 

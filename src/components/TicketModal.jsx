@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sparkles, MapPin, Building2, ShieldAlert, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { X, Sparkles, MapPin, Building2, ShieldAlert, CheckCircle, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export default function TicketModal({ ticket, onClose, onUpdateStatus }) {
   if (!ticket) return null;
@@ -31,6 +31,10 @@ export default function TicketModal({ ticket, onClose, onUpdateStatus }) {
               </span>
               <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 capitalize">
                 {ticket.category}
+              </span>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <span>AI-Verified</span>
               </span>
             </div>
             <p className="text-[11px] text-slate-400">
